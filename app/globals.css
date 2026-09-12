@@ -1,0 +1,800 @@
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+
+    font-family:
+        -apple-system,
+        BlinkMacSystemFont,
+        "SF Pro Display",
+        "SF Pro Text",
+        "Segoe UI",
+        sans-serif;
+
+    background:
+
+        radial-gradient(
+            circle at 15% 0%,
+            #dff3ff,
+            transparent 35%
+        ),
+
+        radial-gradient(
+            circle at 100% 10%,
+            #eee4ff,
+            transparent 35%
+        ),
+
+        #f5f5f7;
+
+    color: #111;
+
+    min-height: 100vh;
+}
+
+button,
+input,
+textarea {
+
+    font: inherit;
+
+}
+
+button {
+
+    cursor: pointer;
+
+}
+
+a {
+
+    text-decoration: none;
+
+}
+
+
+/* -------------------------------- */
+/* 홈 */
+/* -------------------------------- */
+
+.center {
+
+    min-height: 100vh;
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    padding: 25px;
+
+}
+
+
+.glass {
+
+    width:
+        min(700px, 100%);
+
+    padding:
+        55px 35px;
+
+    border-radius: 35px;
+
+    background:
+        rgba(255,255,255,.72);
+
+    backdrop-filter:
+        blur(30px);
+
+    -webkit-backdrop-filter:
+        blur(30px);
+
+    box-shadow:
+        0 25px 80px
+        rgba(0,0,0,.12);
+
+    text-align: center;
+
+}
+
+
+.logo-small {
+
+    font-size: 13px;
+
+    color: #777;
+
+    font-weight: 700;
+
+    letter-spacing: .5px;
+
+}
+
+
+.glass h1 {
+
+    margin:
+        8px 0;
+
+    font-size:
+        clamp(50px, 9vw, 80px);
+
+    letter-spacing:
+        -5px;
+
+}
+
+
+.glass p {
+
+    color:
+        #6e6e73;
+
+    font-size:
+        17px;
+
+}
+
+
+/* -------------------------------- */
+/* 버튼 */
+/* -------------------------------- */
+
+.primary {
+
+    border: 0;
+
+    padding:
+        14px 22px;
+
+    border-radius:
+        16px;
+
+    background:
+        #007aff;
+
+    color:
+        white;
+
+    font-weight:
+        700;
+
+    box-shadow:
+        0 8px 25px
+        rgba(0,122,255,.25);
+
+    transition:
+        .2s;
+
+}
+
+
+.primary:hover {
+
+    transform:
+        translateY(-2px);
+
+}
+
+
+.secondary {
+
+    border: 0;
+
+    padding:
+        13px 18px;
+
+    border-radius:
+        15px;
+
+    background:
+        rgba(0,0,0,.06);
+
+    color:
+        #111;
+
+    font-weight:
+        700;
+
+}
+
+
+.delete {
+
+    border: 0;
+
+    padding:
+        13px 18px;
+
+    border-radius:
+        15px;
+
+    background:
+        #ff3b30;
+
+    color:
+        white;
+
+    font-weight:
+        700;
+
+}
+
+
+/* -------------------------------- */
+/* HOST */
+/* -------------------------------- */
+
+.host {
+
+    width:
+        min(1050px, 92%);
+
+    margin:
+        auto;
+
+    padding:
+        30px 0 80px;
+
+}
+
+
+.topbar {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+}
+
+
+.topbar-left {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    gap:
+        10px;
+
+}
+
+
+.topbar-logo {
+
+    font-size:
+        25px;
+
+    font-weight:
+        800;
+
+    letter-spacing:
+        -1px;
+
+}
+
+
+.badge {
+
+    padding:
+        7px 11px;
+
+    border-radius:
+        999px;
+
+    background:
+        rgba(255,255,255,.65);
+
+    color:
+        #777;
+
+    font-size:
+        11px;
+
+}
+
+
+.hero {
+
+    text-align:
+        center;
+
+    padding:
+        55px 0 35px;
+
+}
+
+
+.hero h1 {
+
+    margin:
+        0;
+
+    font-size:
+        clamp(52px, 9vw, 82px);
+
+    letter-spacing:
+        -6px;
+
+}
+
+
+.hero p {
+
+    color:
+        #777;
+
+}
+
+
+/* -------------------------------- */
+/* 카드 */
+/* -------------------------------- */
+
+.panel {
+
+    padding:
+        28px;
+
+    margin-bottom:
+        25px;
+
+    border-radius:
+        30px;
+
+    background:
+        rgba(255,255,255,.72);
+
+    border:
+        1px solid
+        rgba(255,255,255,.9);
+
+    backdrop-filter:
+        blur(30px);
+
+    -webkit-backdrop-filter:
+        blur(30px);
+
+    box-shadow:
+        0 20px 60px
+        rgba(0,0,0,.08);
+
+}
+
+
+label {
+
+    display:
+        block;
+
+    margin-bottom:
+        9px;
+
+    font-weight:
+        700;
+
+}
+
+
+.input {
+
+    width:
+        100%;
+
+    padding:
+        15px;
+
+    border:
+        1px solid
+        rgba(0,0,0,.08);
+
+    border-radius:
+        15px;
+
+    outline:
+        none;
+
+    background:
+        rgba(255,255,255,.8);
+
+}
+
+
+.input:focus {
+
+    border-color:
+        #007aff;
+
+    box-shadow:
+        0 0 0 4px
+        rgba(0,122,255,.1);
+
+}
+
+
+/* 주소 */
+
+.address {
+
+    display:
+        flex;
+
+    margin-bottom:
+        22px;
+
+}
+
+
+.domain {
+
+    padding:
+        15px;
+
+    background:
+        rgba(0,0,0,.06);
+
+    border-radius:
+        15px 0 0 15px;
+
+    color:
+        #666;
+
+    white-space:
+        nowrap;
+
+}
+
+
+.address .input {
+
+    border-radius:
+        0 15px 15px 0;
+
+}
+
+
+/* 코드 */
+
+.code {
+
+    width:
+        100%;
+
+    min-height:
+        430px;
+
+    padding:
+        18px;
+
+    border:
+        1px solid
+        rgba(0,0,0,.08);
+
+    border-radius:
+        18px;
+
+    resize:
+        vertical;
+
+    outline:
+        none;
+
+    background:
+        rgba(255,255,255,.8);
+
+    font-family:
+        ui-monospace,
+        SFMono-Regular,
+        Menlo,
+        monospace;
+
+    font-size:
+        13px;
+
+    line-height:
+        1.6;
+
+}
+
+
+.code:focus {
+
+    border-color:
+        #007aff;
+
+}
+
+
+/* 버튼 그룹 */
+
+.actions {
+
+    display:
+        flex;
+
+    gap:
+        9px;
+
+    flex-wrap:
+        wrap;
+
+    margin-top:
+        18px;
+
+}
+
+
+.status {
+
+    margin-top:
+        16px;
+
+    color:
+        #666;
+
+    font-size:
+        14px;
+
+}
+
+
+/* -------------------------------- */
+/* 사이트 목록 */
+/* -------------------------------- */
+
+.list-header {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    margin-bottom:
+        10px;
+
+}
+
+
+.list-header h2 {
+
+    margin:
+        0;
+
+}
+
+
+.site {
+
+    display:
+        flex;
+
+    align-items:
+        center;
+
+    justify-content:
+        space-between;
+
+    gap:
+        15px;
+
+    padding:
+        18px 0;
+
+    border-bottom:
+        1px solid
+        rgba(0,0,0,.08);
+
+}
+
+
+.site:last-child {
+
+    border-bottom:
+        none;
+
+}
+
+
+.site-info strong {
+
+    display:
+        block;
+
+    font-size:
+        17px;
+
+}
+
+
+.site-url {
+
+    display:
+        block;
+
+    margin-top:
+        5px;
+
+    color:
+        #007aff;
+
+    font-size:
+        13px;
+
+}
+
+
+.site-actions {
+
+    display:
+        flex;
+
+    gap:
+        7px;
+
+    flex-wrap:
+        wrap;
+
+}
+
+
+.empty {
+
+    text-align:
+        center;
+
+    padding:
+        35px 0;
+
+    color:
+        #777;
+
+}
+
+
+/* -------------------------------- */
+/* 미리보기 */
+/* -------------------------------- */
+
+.preview {
+
+    width:
+        100%;
+
+    height:
+        500px;
+
+    border:
+        none;
+
+    border-radius:
+        20px;
+
+    background:
+        white;
+
+}
+
+
+/* -------------------------------- */
+/* 모바일 */
+/* -------------------------------- */
+
+@media(max-width:650px) {
+
+    .host {
+
+        width:
+            94%;
+
+    }
+
+
+    .glass {
+
+        padding:
+            42px 22px;
+
+        border-radius:
+            27px;
+
+    }
+
+
+    .panel {
+
+        padding:
+            20px;
+
+        border-radius:
+            24px;
+
+    }
+
+
+    .topbar {
+
+        align-items:
+            flex-start;
+
+    }
+
+
+    .badge {
+
+        display:
+            none;
+
+    }
+
+
+    .address {
+
+        display:
+            block;
+
+    }
+
+
+    .domain {
+
+        border-radius:
+            15px 15px 0 0;
+
+    }
+
+
+    .address .input {
+
+        border-radius:
+            0 0 15px 15px;
+
+    }
+
+
+    .site {
+
+        align-items:
+            flex-start;
+
+        flex-direction:
+            column;
+
+    }
+
+
+    .site-actions {
+
+        width:
+            100%;
+
+    }
+
+
+    .site-actions button {
+
+        flex:
+            1;
+
+    }
+
+}
