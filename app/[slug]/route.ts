@@ -12,16 +12,15 @@ export async function GET(request: Request, context: { params: Promise<{ slug: s
   try {
     const result = await get(`sites/${slug}.html`, {
       access: "public",
-      useCache: false,
-      type: "text"
+      useCache: false
     });
 
     if (!result) return notFound();
 
-    return new Response(result, {
+    return new Response(result.stream, {
       status: 200,
       headers: {
-        "Content-Type": "text/html; charset=utf-8",
+        "Content-Type": result.blob.contentType || "text/html; charset=utf-8",
         "Cache-Control": "no-store"
       }
     });
