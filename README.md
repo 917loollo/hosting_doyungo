@@ -1,21 +1,22 @@
-# DOYUNGO HOST
+# Doyun Host — GitHub → Vercel
 
-Vercel에 배포하여 `doyungo.com/원하는이름` 형태로 HTML 사이트를 만드는 개인용 호스팅 서비스입니다.
+## 1. GitHub
+압축을 푼 뒤 **이 폴더 안의 파일과 폴더를 저장소 루트에 업로드**하세요. `hosting-doyungo/hosting-doyungo/`처럼 한 단계 더 들어가면 안 됩니다.
 
-## 배포 순서
+## 2. Vercel
+GitHub 저장소를 Vercel 프로젝트로 연결하고 Framework가 Next.js로 감지되는지 확인하세요.
 
-1. GitHub에 이 프로젝트 전체를 업로드
-2. Vercel에서 GitHub 저장소를 Import
-3. Vercel Blob Store를 프로젝트에 연결
-4. Settings → Environment Variables에서 `ADMIN_PASSWORD` 추가
-5. Redeploy
-6. `/host`에서 관리자 로그인
-7. 주소 이름과 HTML 코드를 입력하여 사이트 생성
-8. Vercel 프로젝트의 Domains에 `doyungo.com` 연결
+## 3. Blob
+Vercel 프로젝트의 Storage에서 Blob store를 만들고 이 프로젝트에 연결하세요. Blob SDK가 제공하는 인증 방식에 따라 연결된 환경변수가 자동으로 구성될 수 있습니다.
 
-예:
-`doyungo.com/game`
+## 4. 관리자 비밀번호
+Vercel 프로젝트의 Settings → Environment Variables에서 Production에 다음을 추가하세요.
 
-## 주의
+`ADMIN_PASSWORD` = 원하는 관리자 비밀번호
 
-현재 버전은 사이트당 단일 HTML을 저장합니다. CSS/JS/이미지 여러 파일을 올리는 ZIP 호스팅은 별도 확장이 필요합니다.
+저장 후 Redeploy하세요.
+
+## 5. 사용
+`/host`에서 로그인한 뒤 slug와 HTML을 입력하면 `/slug` 주소로 사이트가 공개됩니다.
+
+예약된 주소: `/host`, `/api`, `/favicon.ico`

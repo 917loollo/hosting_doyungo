@@ -1,19 +1,25 @@
-import { del } from "@vercel/blob";
+import { del, put } from "@vercel/blob";
 import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
 
-export async function DELETE(request: Request, context: { params: Promise<{ slug: string }> }) {
+async function isAdmin() {
   const store = await cookies();
-  if (store.get("doyun_host_admin")?.value !== "authenticated") {
-    return Response.json({ error: "로그인이 필요합니다." }, { status: 401 });
-  }
+  return store.get("doyun_host_admin")?.value === "authenticated";
+}
+
+export async function PUT(request: Request, context: { params: Promise<{ slug: string }> }) {
+  if (!(await isAdmin())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { slug } = await context.params;
-  if (!/^[a-z0-9_-]{1,40}$/.test(slug)) {
-    return Response.json({ error: "잘못된 주소입니다." }, { status: 400 });
-  }
-  try {
-    await del(`sites/${slug}.html`);
-    return Response.json({ success: true });
-  } catch {
-    return Response.json({ error: "삭제에 실패했습니다." }, { status: 500 });
-  }
+  const body = await request.json().catch(() => ({}));
+  const html = String(body.html ?? "");
+  if (!html.trim()) return NextResponse.json({ error: "HTML 코드를 입력하세요." }, { status: 400 });
+  const blob = await put(`sites/${slug}.html`, html, { access: "public", addRandomSuffix: false, allowOverwrite: true, contentType: "text/html; charset=utf-8" });
+  return NextResponse.json({ ok: true, url: blob.url });
+}
+
+export async function DELETE(_request: Request, context: { params: Promise<{ slug: string }> }) {
+  if (!(await isAdmin())) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { slug } = await context.params;
+  await del(`sites/${slug}.html`);
+  return NextResponse.json({ ok: true });
 }
