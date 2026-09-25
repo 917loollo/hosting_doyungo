@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>DOYUN HOST</title><link rel="stylesheet" href="style.css"></head>
+<body><main class="glass">
+<div class="logo">DOYUN HOST</div><h1>HTML 호스팅</h1><p>HTML을 입력하고 바로 미리보세요.</p>
+<label>사이트 이름</label><input id="siteName" placeholder="예: test">
+<label>HTML 코드</label><textarea id="htmlCode"><!doctype html>
+<html><head><meta charset="utf-8"><title>내 사이트</title></head>
+<body><h1>안녕하세요 👋</h1><p>DOYUN HOST에서 만든 사이트입니다.</p></body></html></textarea>
+<div class="buttons"><button id="previewBtn">미리보기</button><button id="saveBtn">브라우저에 저장</button></div>
+<section><h2>미리보기</h2><iframe id="preview" title="HTML 미리보기"></iframe></section>
+<section><h2>저장된 사이트</h2><div id="sites" class="sites"></div></section>
+</main><script src="script.js"></script></body></html>
