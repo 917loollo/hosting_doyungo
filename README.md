@@ -1,15 +1,26 @@
-# DOYUNGO HOST · Light Symphony
+# DOYUNGO HOST — Light Symphony / Private Blob Edition
 
-HTML-first Vercel hosting console. The main UI is `index.html`; Vercel Functions handle admin authentication and Vercel Blob storage.
+HTML-first hosting manager for Vercel.
 
-## Vercel setup
-1. Import this repository into Vercel.
-2. Connect a Vercel Blob store to the project.
-3. In the Blob connection dialog, enable **Add a read-write token env var to this connection**.
-4. Confirm `BLOB_READ_WRITE_TOKEN` exists in Environment Variables for Production and Preview.
-5. Add `ADMIN_PASSWORD` as a Secret for Production and Preview.
-6. Optional: add `PUBLIC_BASE_URL` such as `https://doyungo.com`. If omitted, the current deployment host is used.
-7. Redeploy after changing environment variables.
+## Important
+This version is designed for a **Private Vercel Blob store**. Sites are stored privately in Blob, and visitors receive the HTML through the Vercel serverless route `/:slug`. Therefore the Blob store itself does NOT need public access.
 
-## Result
-Open the root page to log in. Create a site such as `test`; the public URL becomes `https://doyungo.com/test` when `PUBLIC_BASE_URL=https://doyungo.com` is set.
+## Environment variables
+- `ADMIN_PASSWORD` — administrator login password
+- `PUBLIC_BASE_URL` — optional, e.g. `https://doyungo.com`
+- `BLOB_READ_WRITE_TOKEN` — created automatically when connecting the Blob store with a read-write token
+
+## Deploy
+1. Upload all files to GitHub.
+2. Import the repository into Vercel.
+3. Connect your existing Blob store.
+4. Make sure `ADMIN_PASSWORD` exists in Production.
+5. Redeploy.
+
+## URLs
+- `/` — HTML-first hosting manager
+- `/:slug` — public hosted HTML page
+
+Example: `https://doyungo.com/test`
+
+The public page is served by the Vercel function, while the underlying Blob object remains private.
