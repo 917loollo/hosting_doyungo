@@ -1,0 +1,4 @@
+import { get } from '@vercel/blob';
+const token=()=>process.env.BLOB_READ_WRITE_TOKEN;
+function valid(s){return typeof s==='string'&&/^[a-z0-9](?:[a-z0-9-]{0,38}[a-z0-9])?$/.test(s)}
+export default async function handler(req,res){const slug=req.query?.slug;if(!valid(slug))return res.status(404).send('<h1>404</h1>');try{const r=await get(`sites/${slug}.html`,{access:'public',useCache:false,token:token()});if(!r||!r.blob)return res.status(404).send('<h1>404</h1><p>존재하지 않는 사이트입니다.</p>');res.setHeader('Content-Type',r.blob.contentType||'text/html; charset=utf-8');return r.stream?new Response(r.stream,{headers:{'Content-Type':r.blob.contentType||'text/html; charset=utf-8'}}):res.status(200).send(await r.blob.text())}catch(e){console.error(e);return res.status(404).send('<h1>404</h1><p>존재하지 않는 사이트입니다.</p>')}}
