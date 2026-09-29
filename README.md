@@ -1,22 +1,15 @@
-# DOYUN HOST — 실제 HTML 호스팅
+# DOYUNGO HOST · Light Symphony
 
-## 기능
-- `index.html`이 관리자 화면의 메인
-- 관리자 비밀번호 로그인
-- HTML 저장/수정/삭제
-- Vercel Blob에 실제 저장
-- `https://doyungo.com/원하는이름` 형태의 공개 URL
-- iOS 27 느낌의 glass UI
+HTML-first Vercel hosting console. The main UI is `index.html`; Vercel Functions handle admin authentication and Vercel Blob storage.
 
-## 배포
-1. 이 폴더 전체를 GitHub 새 저장소에 업로드합니다.
-2. Vercel에서 GitHub 저장소를 Import합니다.
-3. Vercel Storage → Blob을 연결합니다.
-4. Environment Variables에 `ADMIN_PASSWORD`를 원하는 관리자 비밀번호로 추가합니다.
-5. `PUBLIC_BASE_URL`도 추가합니다. 예: `https://doyungo.com`
-6. Redeploy합니다.
+## Vercel setup
+1. Import this repository into Vercel.
+2. Connect a Vercel Blob store to the project.
+3. In the Blob connection dialog, enable **Add a read-write token env var to this connection**.
+4. Confirm `BLOB_READ_WRITE_TOKEN` exists in Environment Variables for Production and Preview.
+5. Add `ADMIN_PASSWORD` as a Secret for Production and Preview.
+6. Optional: add `PUBLIC_BASE_URL` such as `https://doyungo.com`. If omitted, the current deployment host is used.
+7. Redeploy after changing environment variables.
 
-### 주의
-Vercel Blob 연결 후 `BLOB_READ_WRITE_TOKEN`이 프로젝트에 생성되어야 합니다.
-관리자 화면은 사이트 루트 `/`에서 열립니다.
-예: `https://doyungo.com/test` → 저장한 HTML 공개 페이지
+## Result
+Open the root page to log in. Create a site such as `test`; the public URL becomes `https://doyungo.com/test` when `PUBLIC_BASE_URL=https://doyungo.com` is set.
