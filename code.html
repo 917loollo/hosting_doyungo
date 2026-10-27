@@ -1,0 +1,402 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>블록 웹 · 블록으로 만드는 웹사이트</title>
+<style>
+:root{--bg1:#e8eefc;--bg2:#f4eaff;--fg:#0f1830;--mu:#5d6b8a;--ac:#007aff;--ac2:#5e5ce6;--tint:255,255,255;--hi:rgba(255,255,255,.85);--ln:rgba(255,255,255,.7);--pill:#fff;--gl:62;--sh:0 10px 40px rgba(40,70,140,.16);box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){--bg1:#070b16;--bg2:#140b26;--fg:#f2f5ff;--mu:#9aa7c7;--ac:#0a84ff;--tint:30,36,60;--hi:rgba(255,255,255,.16);--ln:rgba(255,255,255,.14);--pill:rgba(255,255,255,.22);--sh:0 10px 40px rgba(0,0,0,.5)}}
+:root[data-theme=dark]{--bg1:#070b16;--bg2:#140b26;--fg:#f2f5ff;--mu:#9aa7c7;--ac:#0a84ff;--tint:30,36,60;--hi:rgba(255,255,255,.16);--ln:rgba(255,255,255,.14);--pill:rgba(255,255,255,.22);--sh:0 10px 40px rgba(0,0,0,.5)}
+html{height:100%;scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;height:100%;display:flex;flex-direction:column;color:var(--fg);font:15px/1.5 -apple-system,BlinkMacSystemFont,"SF Pro Display","Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif;overflow:hidden;background:radial-gradient(60% 45% at 12% 6%,rgba(0,122,255,.30),transparent 70%),radial-gradient(50% 40% at 92% 18%,rgba(191,90,242,.26),transparent 70%),radial-gradient(60% 50% at 50% 104%,rgba(48,209,88,.18),transparent 70%),linear-gradient(var(--bg1),var(--bg2));background-attachment:fixed}
+.top,.pn,#pv,#cd,#pal,.gp,.sheet,.tabs{background:rgba(var(--tint),calc(var(--gl)/100));-webkit-backdrop-filter:blur(26px) saturate(1.8);backdrop-filter:blur(26px) saturate(1.8);border:1px solid var(--ln);box-shadow:inset 0 1px 0 var(--hi),var(--sh)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);z-index:30}
+button,input,select,textarea{font:inherit;color:inherit}
+.top{flex:none;display:flex;align-items:center;gap:8px;margin:8px 12px 0;padding:8px 10px 8px 12px;border-radius:28px}
+.logo{width:34px;height:34px;border-radius:12px;display:grid;place-items:center;color:#fff;font:800 13px ui-monospace,Menlo,monospace;background:linear-gradient(145deg,#4da3ff,var(--ac2));box-shadow:inset 0 1px 0 rgba(255,255,255,.6),0 4px 12px rgba(10,132,255,.4)}
+.top b{font-size:18px;letter-spacing:-.3px;white-space:nowrap}
+.st{font-size:12px;color:var(--mu);display:flex;align-items:center;gap:6px;margin-right:auto}.st i{width:8px;height:8px;border-radius:50%;background:#30d158;box-shadow:0 0 0 3px rgba(48,209,88,.25)}
+.bt{border:1px solid var(--ln);background:rgba(var(--tint),.7);border-radius:99px;padding:8px 14px;font-weight:600;cursor:pointer;white-space:nowrap;transition:transform .35s cubic-bezier(.34,1.56,.64,1)}.bt:active{transform:scale(.92)}
+.bt.pr{background:linear-gradient(145deg,#3d9bff,var(--ac));border-color:rgba(255,255,255,.4);color:#fff;box-shadow:inset 0 1px 0 rgba(255,255,255,.5),0 6px 16px rgba(10,132,255,.35)}
+.hd2{flex:none;padding:12px 20px 2px;display:flex;flex-direction:column;gap:2px}
+.hd2 input{font-size:32px;font-weight:800;border:0;background:none;padding:0;outline:none;width:100%;letter-spacing:-.8px}.hd2 small{color:var(--mu)}
+.tabs{flex:none;display:flex;gap:2px;margin:10px 14px 6px;padding:4px;border-radius:99px}
+.tabs button{flex:1;border:0;background:none;border-radius:99px;padding:8px 4px;font-weight:600;font-size:14px;white-space:nowrap;color:var(--mu);cursor:pointer;transition:all .4s cubic-bezier(.34,1.56,.64,1)}.tabs button.on{background:var(--pill);color:var(--fg);box-shadow:0 2px 10px rgba(0,0,0,.16)}
+#dt{display:none;margin:0 0 10px}
+.mn{flex:1;min-height:0;display:flex;gap:12px;padding:0 12px 12px}
+.pn{display:none;min-width:0;min-height:0;flex-direction:column;border-radius:30px;overflow:hidden}
+body[data-v=b] #ws{display:flex;flex:1}body[data-v=p] #out,body[data-v=c] #out{display:flex;flex:1}
+#out{background:none;border:0;box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none;overflow:visible}
+#pv,#cd{display:none;flex:1;min-height:0;border-radius:30px;overflow:hidden}
+body[data-v=p] #pv{display:flex}body[data-v=c] #cd{display:flex;flex-direction:column}
+#pv iframe{flex:1;width:100%;border:0;background:#fff}
+.cb{display:flex;gap:8px;align-items:center;padding:10px 12px;border-bottom:1px solid var(--ln)}.cb span{margin-right:auto;color:var(--mu);font-size:12px}
+#cd pre{flex:1;margin:0;padding:14px;overflow:auto;font:12px/1.6 ui-monospace,Menlo,Consolas,monospace;white-space:pre;tab-size:2}
+.nt{padding:10px 14px;border-top:1px solid var(--ln);color:var(--mu);font-size:12px}
+#bl{flex:1;overflow:auto;padding:10px 12px 96px}
+.bk{--k:#8b6cff;background:rgba(var(--tint),.5);border:1px solid var(--ln);border-radius:22px;padding:10px 12px;margin:10px 0;box-shadow:inset 0 1px 0 var(--hi)}
+.bk.sel{outline:2px solid var(--k);outline-offset:2px}.bk.new{animation:pop .55s cubic-bezier(.34,1.56,.64,1)}
+.bh{display:flex;flex-wrap:wrap;gap:6px 10px;align-items:center}
+.bn{background:var(--k);color:#fff;border-radius:99px;padding:3px 12px;font-size:13px;font-weight:700;white-space:nowrap;box-shadow:inset 0 1px 0 rgba(255,255,255,.4)}
+.fl{display:flex;align-items:center;gap:5px;font-size:12px;color:var(--mu)}
+.bh input,.bh select,.bh textarea{border:1px solid var(--ln);border-radius:12px;padding:6px 10px;background:rgba(var(--tint),.75);min-width:0;max-width:170px}.bh input[type=color]{padding:0;width:36px;height:30px}.bh input[type=number]{width:72px}
+.ib{border:1.5px dashed var(--k);background:none;border-radius:99px;padding:5px 12px;cursor:pointer}
+.ba{margin-left:auto;display:flex;gap:4px}.ba button{border:0;background:rgba(var(--tint),.85);border-radius:50%;width:30px;height:30px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.bc{margin:8px 0 2px 6px;padding-left:10px;border-left:2px solid rgba(120,130,170,.28)}
+.bz{border:1.5px dashed rgba(120,130,170,.45);border-radius:16px;padding:8px;text-align:center;font-size:12px;color:var(--mu);cursor:pointer}.sel>.bc>.bz{border-color:var(--k);color:var(--k);font-weight:700}
+#pal{display:none;flex-direction:column;gap:8px;padding:12px;border-radius:30px;overflow:hidden}
+#pal>*{flex:none}#pal>#pg{flex:1 1 auto;min-height:0}
+#pal input{border:1px solid var(--ln);background:rgba(var(--tint),.75);border-radius:99px;padding:10px 14px;width:100%}
+#ch{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}.ch{flex:none;border:1px solid var(--ln);background:rgba(var(--tint),.65);border-radius:99px;padding:5px 13px;font-size:13px;cursor:pointer;white-space:nowrap}.ch.on{background:var(--ac);color:#fff;border-color:transparent}
+#pg{display:flex;flex-wrap:wrap;gap:7px;overflow:auto;align-content:flex-start}
+.pb{--k:#888;border:1px solid var(--ln);background:rgba(var(--tint),.65);border-radius:99px;padding:7px 13px 7px 10px;font-size:13px;cursor:pointer;display:inline-flex;align-items:center;gap:7px;transition:transform .3s cubic-bezier(.34,1.56,.64,1)}.pb::before{content:"";width:9px;height:9px;border-radius:50%;background:var(--k)}.pb:active{transform:scale(.9)}
+.cw{display:inline-flex;align-items:center}.ed{border:0;background:none;cursor:pointer;color:var(--mu);padding:4px 6px}
+#fab{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));z-index:15;border:1px solid rgba(255,255,255,.45);border-radius:99px;padding:14px 22px;font-weight:700;color:#fff;background:linear-gradient(145deg,rgba(61,155,255,.95),rgba(94,92,230,.92));-webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);box-shadow:inset 0 1px 0 rgba(255,255,255,.55),0 14px 32px rgba(10,132,255,.45);display:none}
+body[data-v=b] #fab{display:block}
+body.po[data-v=b] #pal{display:flex;position:fixed;left:8px;right:8px;bottom:8px;max-height:58dvh;z-index:20;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px));animation:sheet .5s cubic-bezier(.34,1.3,.64,1)}
+body.po[data-v=b] #pal::before{content:"";align-self:center;width:40px;height:5px;border-radius:9px;background:rgba(120,130,170,.5)}
+body.po[data-v=b] #fab{display:none}
+#pcl{display:none}body.po[data-v=b] #pcl{display:block}
+.tt{position:fixed;left:50%;bottom:calc(88px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:rgba(20,24,40,.74);-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,.2);color:#fff;border-radius:99px;padding:10px 18px;font-size:14px;z-index:70;opacity:0;transition:.3s;pointer-events:none}.tt.on{opacity:1}
+.gp{position:fixed;top:calc(68px + env(safe-area-inset-top,0px));right:14px;z-index:50;width:min(290px,calc(100vw - 28px));border-radius:24px;padding:14px;display:none}.gp.on{display:block;animation:pop .4s cubic-bezier(.34,1.56,.64,1)}.gp input{width:100%;accent-color:var(--ac)}.gp small{color:var(--mu);display:block;margin-top:4px}
+.md{position:fixed;inset:0;z-index:60;display:none;align-items:flex-end;justify-content:center;background:rgba(10,14,30,.38);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}.md.on{display:flex}
+.sheet{width:min(560px,100%);max-height:92dvh;overflow:auto;border-radius:30px 30px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom,0px));animation:sheet .5s cubic-bezier(.34,1.3,.64,1);background:rgba(var(--tint),.88)}
+.sheet h3{margin:0 0 6px;font-size:20px}.sheet label{display:block;font-weight:600;font-size:13px;color:var(--mu);margin:12px 0 5px}
+.sheet input,.sheet textarea,.sheet select{width:100%;border:1px solid var(--ln);border-radius:14px;padding:10px 12px;background:rgba(var(--tint),.9)}.sheet textarea{font:12.5px/1.5 ui-monospace,Menlo,Consolas,monospace;min-height:110px}
+.sheet small{color:var(--mu);display:block;margin-top:5px;line-height:1.5}
+.fr{display:grid;grid-template-columns:1fr 96px 1fr;gap:6px;align-items:center;margin:6px 0}.fr b{overflow:hidden;text-overflow:ellipsis}
+.ex{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}.ex button{border:1px solid var(--ln);background:rgba(var(--tint),.8);border-radius:99px;padding:5px 12px;font-size:12px;cursor:pointer}
+.sa{display:flex;gap:8px;margin-top:16px}.sa .bt{flex:1;text-align:center}.sa .dn{color:#ff453a}
+@keyframes pop{0%{transform:scale(.9);opacity:0}100%{transform:none;opacity:1}}
+@keyframes sheet{from{transform:translateY(46px) scale(.97);opacity:0}}
+@media(min-width:700px){.md{align-items:center}.sheet{border-radius:30px}}
+@media(min-width:1000px){.tabs{display:none}#dt{display:flex}.mn{padding-top:6px}#ws{display:flex!important;flex:1.1!important}#out{display:flex!important;flex:1!important}#pal,body.po[data-v=b] #pal{display:flex;position:static;width:310px;max-height:none;flex:none;padding-bottom:12px;animation:none}body.po[data-v=b] #pal::before{display:none}#fab,body[data-v=b] #fab,#pcl,body.po[data-v=b] #pcl{display:none}.tt{bottom:24px}}
+@media(max-width:520px){.top .bt span,.st span{display:none}.top .bt{padding:8px 11px}.top{gap:6px}}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body data-v="b">
+<header class="top">
+  <div class="logo">&lt;/&gt;</div><b>블록 웹</b>
+  <div class="st"><i></i><span id="stt">준비됨</span></div>
+  <button class="bt" id="bSave">💾<span> 저장</span></button>
+  <button class="bt" id="bLoad">📂<span> 불러오기</span></button>
+  <button class="bt pr" id="bDemo">✨<span> 예시</span></button>
+  <button class="bt" id="bGl" aria-label="유리 투명도">🪟</button>
+</header>
+<div class="gp" id="gp"><b>유리 투명도</b><input type="range" id="gl" min="25" max="95" value="62" aria-label="유리 투명도"><small>iOS 27처럼 유리가 얼마나 비칠지 정해요. 글자가 안 보이면 오른쪽으로 올려요.</small></div>
+<div class="hd2"><input id="ttl" value="나의 첫 웹사이트" aria-label="사이트 이름"><small>블록을 연결하면 HTML이 바로 만들어져요 · 기본 블록 <span id="nb">138</span>개 · 나만의 블록 <span id="nc">0</span>개</small></div>
+<nav class="tabs" id="mt"><button data-v="b" class="on">🧩 블록</button><button data-v="p">👀 미리보기</button><button data-v="c">{ } HTML 코드</button></nav>
+<main class="mn">
+  <aside id="pal"><button class="bt" id="pcl">▼ 닫기</button><button class="bt pr" id="bNew">＋ 나만의 블록 만들기</button><input id="q" placeholder="블록 검색 (예: 버튼, 별똥별)"><div id="ch"></div><div id="pg"></div></aside>
+  <section class="pn" id="ws"><div id="bl"></div></section>
+  <section class="pn" id="out">
+    <nav class="tabs" id="dt"><button data-v="p" class="on">👀 미리보기</button><button data-v="c">{ } HTML 코드</button></nav>
+    <div id="pv"><iframe id="fr" sandbox="allow-scripts allow-forms allow-modals allow-popups" title="미리보기"></iframe></div>
+    <div id="cd"><div class="cb"><span id="cc">0줄</span><button class="bt pr" id="bCopy">코드 복사</button></div><pre id="pre"></pre><div class="nt">복사한 코드를 메모장에 붙여 넣고 index.html로 저장하면 어디서든 열려요. 이미지 주소는 미리보기에서 막히지만 저장한 파일에서는 보여요.</div></div>
+  </section>
+</main>
+<div class="md" id="cm"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="cmt">
+  <h3 id="cmt">나만의 블록 만들기</h3>
+  <label for="cmn">블록 이름</label><input id="cmn" placeholder="예: 인사 카드" maxlength="20">
+  <label for="cmh">HTML 조각</label><textarea id="cmh" spellcheck="false" placeholder='&lt;div class="card"&gt;&lt;h3&gt;{제목}&lt;/h3&gt;&lt;p&gt;{내용}&lt;/p&gt;&lt;/div&gt;'></textarea>
+  <small><b>{이름}</b> 을 쓰면 입력칸이 생겨요 · <b>{@}</b> 는 안에 다른 블록을 넣는 자리 · 줄이 <b>@css</b> 나 <b>@js</b> 로 시작하면 CSS·자바스크립트로 들어가요.</small>
+  <div class="ex"><button data-x="card">카드</button><button data-x="notice">알림 띠</button><button data-x="box">안에 넣는 상자</button></div>
+  <label>입력칸 설정</label><div id="cmf"><small>위 코드에 {이름} 을 쓰면 여기에 나타나요.</small></div>
+  <div class="sa"><button class="bt" id="cmx">취소</button><button class="bt dn" id="cmd" hidden>삭제</button><button class="bt pr" id="cms">저장</button></div>
+</div></div>
+<button id="fab">＋ 블록 추가</button>
+<input type="file" id="fi" accept="image/*" hidden>
+<div class="tt" id="tt"></div>
+
+<script>
+/* ---------- 블록 125개 정의 ----------
+   [id, 분류, 이름, 입력칸(이름|라벨|종류|기본값|선택지;...), HTML 조각]
+   종류: t글 x여러줄 u주소 n숫자 c색 s선택 i사진 / {@}=안쪽 블록 / @css @js @head = 문서 위치 지정 */
+var CATS={p:['페이지','#8b6cff'],i:['UI','#0a84ff'],t:['글','#3d7bff'],m:['미디어','#ff5c8a'],b:['버튼','#1fb67a'],l:['레이아웃','#ff9a3d'],f:['폼','#16b5c9'],e:['효과','#c44bff'],j:['동작','#e0ac00'],k:['정보','#6f8fc0'],z:['나만의','#ff6b4a']};
+var PIC='https://picsum.photos/seed/doyun/600/320';
+var BL=[
+['start','p','시작','',''],
+['title','p','페이지 제목','text|제목|t|나의 웹사이트',`@title {text}`],
+['desc','p','페이지 설명','text|설명|t|나를 소개하는 웹사이트',`@head <meta name="description" content="{text}">`],
+['icon','p','탭 아이콘','e|이모지|t|🚀',`@head <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>{e}</text></svg>">`],
+['theme','p','상단바 색(모바일)','c|색|c|#0a0e1a',`@head <meta name="theme-color" content="{c}">`],
+['lang','p','언어','l|언어|s|ko|ko/en/ja/zh',`@lang {l}`],
+['bg','p','배경색','c|색|c|#0a0e1a',`@css :root{--bg:{c}}`],
+['fg','p','글자색','c|색|c|#eef2ff',`@css :root{--fg:{c}}`],
+['ac','p','포인트 색','c|색|c|#6ea8ff',`@css :root{--ac:{c}}`],
+['font','p','웹 글꼴','f|글꼴|s|Noto Sans KR|Noto Sans KR/Nanum Gothic/Gowun Dodum/Black Han Sans/Nanum Pen Script',`@head <link href="https://fonts.googleapis.com/css2?family={f:url}&display=swap" rel="stylesheet">\n@css body{font-family:"{f}",sans-serif}`],
+['grad','p','그라데이션 배경','a|시작|c|#0a0e1a;b|끝|c|#1b2a5a',`@css body{background:linear-gradient(160deg,{a},{b}) fixed}`],
+['gradanim','p','움직이는 배경','a|색1|c|#0a0e1a;b|색2|c|#1b2a5a;c|색3|c|#3a1c5a',`@css body{background:linear-gradient(-45deg,{a},{b},{c},{a});background-size:400% 400%;animation:gx 14s ease infinite}@keyframes gx{50%{background-position:100% 50%}}`],
+['smooth','p','부드러운 스크롤','',`@css html{scroll-behavior:smooth}`],
+['css','p','내 CSS 코드','x|CSS|x|',`@css {x:raw}`],
+['h1','t','큰 제목','text|글|t|환영합니다',`<h1>{text}</h1>`],
+['h2','t','제목','text|글|t|소개',`<h2>{text}</h2>`],
+['h3','t','소제목','text|글|t|소제목',`<h3>{text}</h3>`],
+['p','t','문단','text|글|x|여기에 내용을 적어 보세요.',`<p>{text:br}</p>`],
+['lead','t','큰 문단','text|글|t|Think Different. Create Future.',`<p class="lead">{text}</p>`],
+['bold','t','굵은 글','text|글|t|중요한 내용',`<p><b>{text}</b></p>`],
+['ital','t','기울인 글','text|글|t|살짝 기울인 글',`<p><i>{text}</i></p>`],
+['quote','t','인용구','text|글|t|좋은 말을 적어요;who|사람|t|나',`<blockquote>{text}<cite>— {who}</cite></blockquote>`],
+['code','t','코드 상자','x|코드|x|console.log("hi")',`<pre><code>{x}</code></pre>`],
+['hr','t','구분선','',`<hr>`],
+['gap','t','빈 공간','n|높이|n|40',`<div style="height:{n}px"></div>`],
+['ctext','t','꾸민 글자','text|글|t|예쁜 글자;c|색|c|#ff7ab6;n|크기|n|28',`<p style="color:{c};font-size:{n}px">{text}</p>`],
+['ul','t','점 목록','x|줄마다|x|사과\n바나나\n포도',`<ul>{x:li}</ul>`],
+['ol','t','번호 목록','x|줄마다|x|첫째\n둘째\n셋째',`<ol>{x:li}</ol>`],
+['gtext','t','그라데이션 글씨','text|글|t|DOYUN GO;a|색1|c|#6ea8ff;b|색2|c|#c44bff',`<h2 class="gt" style="--a:{a};--b:{b}">{text}</h2>`],
+['align','t','글자 정렬 상자','a|정렬|s|center|left/center/right',`<div style="text-align:{a}">{@}</div>`],
+['photo','m','사진 추가','src|사진|i;alt|설명|t|사진',`<img class="im" src="{src:raw}" alt="{alt}">`],
+['img','m','이미지 주소','url|주소|u|'+PIC+';alt|설명|t|이미지',`<img class="im" src="{url}" alt="{alt}">`],
+['avatar','m','동그란 사진','url|주소|u|https://picsum.photos/seed/me/200',`<img class="im av" src="{url}" alt="">`],
+['logo','m','로고 이미지','url|주소|u|https://picsum.photos/seed/logo/120',`<img class="lg" src="{url}" alt="logo">`],
+['video','m','동영상','url|주소|u|https://example.com/video.mp4',`<video class="im" src="{url}" controls playsinline></video>`],
+['yt','m','유튜브','id|영상 ID|t|M7lc1UVf-VE',`<iframe class="im" style="aspect-ratio:16/9;width:100%;border:0" src="https://www.youtube.com/embed/{id}" allowfullscreen></iframe>`],
+['audio','m','오디오','url|주소|u|https://example.com/sound.mp3',`<audio src="{url}" controls></audio>`],
+['emoji','m','큰 이모지','e|이모지|t|🚀;n|크기|n|56',`<div class="em" style="font-size:{n}px">{e}</div>`],
+['icontext','m','아이콘 + 글','e|이모지|t|✨;text|글|t|멋진 기능',`<p class="it"><span>{e}</span>{text}</p>`],
+['map','m','지도','q|장소|t|서울시청',`<iframe class="im" style="width:100%;height:300px;border:0" src="https://maps.google.com/maps?q={q:url}&output=embed"></iframe>`],
+['bgimg','m','배경 사진 구역','url|주소|u|'+PIC+';h|높이|n|320',`<section class="bgs" style="background-image:linear-gradient(#0009,#0009),url({url});min-height:{h}px">{@}</section>`],
+['gallery','m','사진 갤러리','',`<div class="gal">{@}</div>`],
+['btn','b','버튼','text|글|t|시작하기;url|주소|u|#',`<a class="btn" href="{url}">{text}</a>`],
+['btno','b','테두리 버튼','text|글|t|더 보기;url|주소|u|#',`<a class="btn o" href="{url}">{text}</a>`],
+['pill','b','알약 버튼','text|글|t|무료로 시작;url|주소|u|#',`<a class="btn p" href="{url}">{text}</a>`],
+['alertbtn','b','알림 버튼','text|글|t|눌러 보세요;msg|알림|t|안녕하세요!',`<button class="btn" onclick="alert({msg:ja})">{text}</button>`],
+['link','b','글자 링크','text|글|t|여기를 눌러요;url|주소|u|https://example.com',`<p><a href="{url}">{text}</a></p>`],
+['tel','b','전화 걸기','text|글|t|전화하기;n|번호|t|010-0000-0000',`<a class="btn" href="tel:{n}">📞 {text}</a>`],
+['mail','b','이메일 보내기','text|글|t|메일 보내기;m|주소|t|me@example.com',`<a class="btn" href="mailto:{m}">✉️ {text}</a>`],
+['totop','b','맨 위로 버튼','',`<a class="top" href="#">↑</a>`],
+['share','b','공유 버튼','text|글|t|공유하기',`<button class="btn o" onclick="navigator.share?navigator.share({title:document.title,url:location.href}):alert(location.href)">{text}</button>`],
+['anchor','b','이동 지점','id|이름|t|start',`<span id="{id}"></span>`],
+['goto','b','지점으로 이동','text|글|t|아래로;id|이름|t|start',`<a class="btn o" href="#{id}">{text}</a>`],
+['dl','b','다운로드 링크','text|글|t|내려받기;url|주소|u|#',`<a class="btn" href="{url}" download>{text}</a>`],
+['sns','b','SNS 버튼','p|종류|s|인스타그램|인스타그램/유튜브/깃허브/틱톡/블로그;url|주소|u|https://',`<a class="btn o" href="{url}" target="_blank" rel="noopener">{p}</a>`],
+['box','l','상자','',`<div class="bx">{@}</div>`],
+['wrap','l','가운데 정렬 폭','',`<div class="w">{@}</div>`],
+['row','l','가로 배치','n|간격|n|12',`<div class="row" style="gap:{n}px">{@}</div>`],
+['col','l','세로 배치','',`<div class="col">{@}</div>`],
+['g2','l','2칸 격자','',`<div class="g2">{@}</div>`],
+['g3','l','3칸 격자','',`<div class="g3">{@}</div>`],
+['g4','l','4칸 격자','',`<div class="g4">{@}</div>`],
+['card','l','카드','',`<div class="card">{@}</div>`],
+['section','l','구역','n|위아래 여백|n|60',`<section style="padding:{n}px 20px">{@}</section>`],
+['hero','l','히어로(화면 가득)','',`<section class="hero">{@}</section>`],
+['header','l','머리말','',`<header class="hd">{@}</header>`],
+['footer','l','꼬리말','',`<footer class="ft">{@}</footer>`],
+['nav','l','메뉴 바','brand|이름|t|DOYUN GO',`<nav class="nv"><b>{brand}</b><div class="row">{@}</div></nav>`],
+['sticky','l','위에 고정','',`<div class="stk">{@}</div>`],
+['scrollx','l','가로로 넘기기','',`<div class="sx">{@}</div>`],
+['glass','l','유리 상자','',`<div class="glass">{@}</div>`],
+['center','l','정중앙','',`<div class="ctr">{@}</div>`],
+['details','l','접었다 펴기','t|제목|t|자세히 보기',`<details class="card"><summary>{t}</summary>{@}</details>`],
+['modal','l','팝업 창','t|버튼 글|t|팝업 열기',`<button class="btn" onclick="this.nextElementSibling.showModal()">{t}</button><dialog class="dg">{@}<form method="dialog"><button class="btn o">닫기</button></form></dialog>`],
+['form','f','폼','msg|보낸 뒤 알림|t|전송되었어요!',`<form class="fm" onsubmit="event.preventDefault();alert({msg:ja})">{@}</form>`],
+['input','f','입력칸','ph|안내|t|이름',`<input placeholder="{ph}">`],
+['email','f','이메일 입력','ph|안내|t|이메일',`<input type="email" placeholder="{ph}">`],
+['pass','f','비밀번호 입력','ph|안내|t|비밀번호',`<input type="password" placeholder="{ph}">`],
+['area','f','여러 줄 입력','ph|안내|t|내용을 적어 주세요',`<textarea rows="4" placeholder="{ph}"></textarea>`],
+['select','f','선택 상자','x|줄마다|x|선택 1\n선택 2\n선택 3',`<select>{x:opt}</select>`],
+['check','f','체크 상자','text|글|t|동의합니다',`<label class="ck"><input type="checkbox"> {text}</label>`],
+['date','f','날짜 선택','',`<input type="date">`],
+['submit','f','제출 버튼','text|글|t|보내기',`<button class="btn">{text}</button>`],
+['search','f','검색창','ph|안내|t|검색어를 입력',`<input type="search" placeholder="{ph}">`],
+['login','f','로그인 폼','msg|알림|t|로그인 화면 예시예요',`<form class="fm" onsubmit="event.preventDefault();alert({msg:ja})"><input placeholder="아이디"><input type="password" placeholder="비밀번호"><button class="btn">로그인</button></form>`],
+['range','f','슬라이더','',`<input type="range">`],
+['colorin','f','색 고르기','',`<input type="color" value="#6ea8ff">`],
+['shoot','e','별똥별 효과','',`<canvas id="sc"></canvas>\n@css #sc,#sf{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none}\n@js (function(){var c=document.getElementById('sc'),x=c.getContext('2d'),S=[],w,h;window.__ss=true;function r(){w=c.width=innerWidth;h=c.height=innerHeight}r();addEventListener('resize',r);(function t(){x.clearRect(0,0,w,h);if(window.__ss&&Math.random()<.03)S.push({x:Math.random()*w+80,y:Math.random()*h*.4,l:0});S=S.filter(function(s){s.x-=9;s.y+=5;s.l++;var g=x.createLinearGradient(s.x,s.y,s.x+90,s.y-50);g.addColorStop(0,'#fff');g.addColorStop(1,'#fff0');x.strokeStyle=g;x.lineWidth=2;x.beginPath();x.moveTo(s.x,s.y);x.lineTo(s.x+90,s.y-50);x.stroke();return s.l<70});requestAnimationFrame(t)})()})()`],
+['stars','e','반짝이는 별 배경','',`<canvas id="sf"></canvas>\n@css #sc,#sf{position:fixed;inset:0;width:100%;height:100%;z-index:-1;pointer-events:none}\n@js (function(){var c=document.getElementById('sf'),x=c.getContext('2d'),A=[],w,h;function r(){w=c.width=innerWidth;h=c.height=innerHeight;A=[];for(var i=0;i<130;i++)A.push({x:Math.random()*w,y:Math.random()*h,r:Math.random()*1.4+.3,p:Math.random()*6})}r();addEventListener('resize',r);(function t(n){x.clearRect(0,0,w,h);A.forEach(function(s){x.globalAlpha=.4+.6*Math.abs(Math.sin(n/900+s.p));x.fillStyle='#fff';x.beginPath();x.arc(s.x,s.y,s.r,0,7);x.fill()});requestAnimationFrame(t)})(0)})()`],
+['shoottoggle','e','별똥별 켜기/끄기','',`<button class="btn o" onclick="window.__ss=!window.__ss;this.textContent='별똥별 '+(window.__ss?'ON':'OFF')">별똥별 ON</button>`],
+['glow','e','네온 글로우 상자','c|색|c|#6ea8ff',`<div style="color:{c};text-shadow:0 0 10px {c},0 0 30px {c}">{@}</div>`],
+['shadow','e','그림자 상자','c|색|c|#6ea8ff',`<div style="box-shadow:0 12px 40px {c}66;border-radius:16px;padding:16px">{@}</div>`],
+['round','e','둥근 모서리 상자','n|둥글기|n|24',`<div style="border-radius:{n}px;overflow:hidden;background:#ffffff0d;padding:16px">{@}</div>`],
+['fade','e','천천히 나타나기','',`<div class="fi">{@}</div>\n@css .fi{animation:fi 1s both}@keyframes fi{from{opacity:0;transform:translateY(16px)}}`],
+['float','e','둥둥 떠다니기','',`<div class="fl">{@}</div>\n@css .fl{animation:fl 3s ease-in-out infinite}@keyframes fl{50%{transform:translateY(-12px)}}`],
+['spin','e','빙글빙글 돌기','',`<div class="sp">{@}</div>\n@css .sp{display:inline-block;animation:sp 6s linear infinite}@keyframes sp{to{transform:rotate(1turn)}}`],
+['reveal','e','스크롤하면 나타나기','',`<div class="rv">{@}</div>\n@css .rv{opacity:0;transform:translateY(24px);transition:.8s}.rv.on{opacity:1;transform:none}\n@js var io=new IntersectionObserver(function(a){a.forEach(function(e){if(e.isIntersecting)e.target.classList.add('on')})});document.querySelectorAll('.rv').forEach(function(e){io.observe(e)})`],
+['typing','e','타이핑 효과','text|글|t|안녕하세요, 반가워요!',`<h2 class="ty" data-t="{text}"></h2>\n@js document.querySelectorAll('.ty').forEach(function(e){var t=e.dataset.t,i=0;(function f(){e.textContent=t.slice(0,i++);if(i<=t.length)setTimeout(f,90)})()})`],
+['cursorlight','e','마우스 따라다니는 빛','',`<div class="cl" id="cl"></div>\n@css .cl{position:fixed;width:320px;height:320px;margin:-160px;border-radius:50%;background:radial-gradient(#6ea8ff40,#0000 70%);pointer-events:none;z-index:-1}\n@js addEventListener('pointermove',function(e){var c=document.getElementById('cl');c.style.left=e.clientX+'px';c.style.top=e.clientY+'px'})`],
+['scrollbar','e','스크롤 진행 바','',`<div id="pg" style="position:fixed;top:0;left:0;height:4px;width:0;background:var(--ac);z-index:9"></div>\n@js addEventListener('scroll',function(){var d=document.documentElement;document.getElementById('pg').style.width=(d.scrollTop/((d.scrollHeight-d.clientHeight)||1)*100)+'%'})`],
+['hover','e','올리면 커지는 상자','',`<div class="hv">{@}</div>\n@css .hv{transition:.25s}.hv:hover{transform:scale(1.04)}`],
+['welcome','j','환영 팝업(7일간 숨김)','t|제목|t|Welcome to Doyun;d|내용|t|© 2026 Doyun ver. 4.2 (NEW)',`<dialog class="dg wl"><h3>{t}</h3><p>{d}</p><div class="row"><button class="btn" onclick="this.closest('dialog').close()">닫기</button><button class="btn o" onclick="try{localStorage.wl=Date.now()+6048e5}catch(e){}this.closest('dialog').close()">7일 동안 보지 않기</button></div></dialog>\n@js (function(){var d=document.querySelector('.wl'),h=0;try{h=localStorage.wl>Date.now()}catch(e){}if(d&&!h)d.showModal()})()`],
+['loadalert','j','접속하면 알림창','msg|알림|t|어서 오세요!',`@js alert({msg:js})`],
+['dark','j','밝게/어둡게 바꾸기','text|글|t|테마 바꾸기',`<button class="btn o" onclick="document.body.classList.toggle('lt')">🌓 {text}</button>\n@css body.lt{--bg:#f6f8ff;--fg:#10162a;--mu:#5b6685}`],
+['counter','j','클릭 횟수 세기','text|글|t|👍 좋아요',`<button class="btn" onclick="var b=this.lastElementChild;b.textContent=+b.textContent+1">{text} <b>0</b></button>`],
+['clock','j','디지털 시계','',`<div class="clk tm"></div>\n@js setInterval(function(){document.querySelectorAll('.tm').forEach(function(e){e.textContent=new Date().toLocaleTimeString('ko-KR')})},500)`],
+['dday','j','D-day 세기','d|날짜|t|2026-12-25',`<p class="clk dd" data-d="{d}"></p>\n@js document.querySelectorAll('.dd').forEach(function(e){var n=Math.ceil((new Date(e.dataset.d)-new Date())/864e5);e.textContent=n>0?'D-'+n:n==0?'D-DAY':'D+'+(-n)})`],
+['visits','j','방문 횟수','',`<p class="mu">방문 <b class="vc">1</b>회</p>\n@js (function(){try{var n=+localStorage.vc||0;localStorage.vc=++n;document.querySelector('.vc').textContent=n}catch(e){}})()`],
+['showhide','j','눌러서 보이기/숨기기','t|버튼 글|t|보기/숨기기',`<button class="btn o" onclick="var d=this.nextElementSibling;d.hidden=!d.hidden">{t}</button><div hidden>{@}</div>`],
+['js','j','내 JS 코드','x|JS|x|',`@js {x:raw}`],
+['colorchg','j','눌러서 배경 바꾸기','text|글|t|배경 바꾸기',`<button class="btn" onclick="document.body.style.background='hsl('+Math.random()*360+',60%,18%)'">{text}</button>`],
+['copybtn','j','글자 복사 버튼','text|글|t|계정 복사;c|복사할 글|t|doyun',`<button class="btn o" onclick="navigator.clipboard?navigator.clipboard.writeText({c:ja}):0;this.textContent='복사됨!'">{text}</button>`],
+['redirect','j','자동 이동','n|몇 초 뒤|n|5;url|주소|u|https://example.com',`@js setTimeout(function(){location.href={url:js}},{n}*1000)`],
+['randq','j','랜덤 문구','x|줄마다|x|오늘도 화이팅!\n천천히 가도 괜찮아\n해내고 말 거야',`<p class="lead rq" data-q="{x}"></p>\n@js document.querySelectorAll('.rq').forEach(function(e){var a=e.dataset.q.split('\\n');e.textContent=a[Math.floor(Math.random()*a.length)]})`],
+['infocard','k','정보 카드','e|이모지|t|⚡;t|제목|t|빠르게;d|설명|t|한눈에 보이는 설명',`<div class="card"><div class="em">{e}</div><h3>{t}</h3><p class="mu">{d}</p></div>`],
+['price','k','가격표','n|이름|t|베이직;p|가격|t|9,900원;x|혜택|x|기능 하나\n기능 둘',`<div class="card"><h3>{n}</h3><h2>{p}</h2><ul>{x:li}</ul></div>`],
+['review','k','후기','text|글|t|정말 좋아요!;who|이름|t|김도윤;s|별점|n|5',`<div class="card"><p>“{text}”</p><b>{who}</b> <span>{s:star}</span></div>`],
+['faq','k','질문과 답','q|질문|t|무료인가요?;a|답|t|네, 무료예요.',`<details class="card"><summary>{q}</summary><p class="mu">{a}</p></details>`],
+['bar','k','진행 바','t|글|t|HTML;n|퍼센트|n|80',`<div class="pb"><span style="width:{n}%">{t}</span></div>`],
+['badge','k','배지','text|글|t|NEW',`<span class="tag">{text}</span>`],
+['notice','k','알림 박스','text|글|t|꼭 읽어 주세요!',`<div class="nt">{text}</div>`],
+['stat','k','통계 숫자','n|숫자|t|1,250;t|설명|t|방문자',`<div class="st"><b>{n}</b><span class="mu">{t}</span></div>`],
+['table','k','표','x|줄마다(쉼표로 칸)|x|이름,나이\n철수,12\n영희,11',`{x:tbl}`],
+['timeline','k','연혁 한 줄','d|날짜|t|2026.01;t|내용|t|사이트를 열었어요',`<div class="tl"><b>{d}</b><p class="mu">{t}</p></div>`],
+['copyright','k','저작권 문구','y|연도|t|2026;name|이름|t|Doyun',`<p class="mu c">© {y} {name}. All Rights Reserved.</p>`],
+['uistyle','i','UI 스타일 고르기','s|스타일|s|iOS 유리|iOS 유리/미니멀 밝은/네온 다크/종이 느낌/레트로 픽셀',`@css {s:ui}`],
+['uiradius','i','UI 모서리 둥글기','n|px|n|18',`@css .card,.glass,.nt,.btn,input,select,textarea,.im,.dg{border-radius:{n}px}`],
+['uibtn','i','UI 버튼 모양','s|모양|s|알약|알약/둥근 네모/각진 네모',`@css .btn{border-radius:{s:bs}}`],
+['uiglass','i','UI 유리 투명도','n|0~100|n|45',`@css .card,.glass,.nt,.dg,.stk{background:rgba(255,255,255,{n:pct});-webkit-backdrop-filter:blur(24px) saturate(1.6);backdrop-filter:blur(24px) saturate(1.6)}`],
+['uifont','i','UI 글자 크기','n|px|n|17',`@css body{font-size:{n}px}`],
+['uiline','i','UI 줄 간격','n|배|n|1.7',`@css body{line-height:{n}}`],
+['uiwidth','i','UI 내용 폭','n|px|n|820',`@css .w{max-width:{n}px}`],
+['uicard','i','UI 카드 모양','s|모양|s|유리|유리/테두리만/그림자/꽉 찬 색',`@css .card,.glass{ {s:cs} }`],
+['uibcolor','i','UI 버튼 색','c|색|c|#ff5c8a',`@css .btn{background:{c}}.btn.o{background:none;color:{c};border-color:{c}}`],
+['uishadow','i','UI 그림자 세기','s|세기|s|보통|없음/약하게/보통/강하게',`@css .card,.glass,.btn{box-shadow:{s:sh}}`],
+['uispeed','i','UI 움직임 속도','s|속도|s|보통|빠르게/보통/느리게',`@css .btn,.card,.glass,a{transition:all {s:sp}s}`],
+['uialign','i','UI 기본 정렬','s|정렬|s|가운데|왼쪽/가운데',`@css body{text-align:{s:ta}}`],
+['uimode','i','UI 밝기 모드','s|모드|s|어둡게|어둡게/밝게/기기 설정 따라',`@css {s:mode}`]
+];
+
+/* UI 블록용 값 사전 */
+var UIM={
+ui:{'iOS 유리':':root{--bg:#0a0e1a}body{background:radial-gradient(60% 50% at 20% 10%,#3b6bff55,transparent),radial-gradient(50% 50% at 85% 30%,#c44bff44,transparent),radial-gradient(60% 60% at 50% 100%,#00d4ff33,transparent),#0a0e1a fixed}.card,.glass,.nt,.dg,.stk{background:#ffffff1a;-webkit-backdrop-filter:blur(24px) saturate(1.8);backdrop-filter:blur(24px) saturate(1.8);border:1px solid #ffffff3a;box-shadow:inset 0 1px 0 #ffffff55,0 12px 40px #0006}.btn{border-radius:99px;box-shadow:inset 0 1px 0 #fff6}input,select,textarea{border-radius:14px}',
+'미니멀 밝은':':root{--bg:#fff;--fg:#111;--mu:#666;--ac:#111}body{background:#fff}.card,.glass,.nt{background:#f6f6f6;border:1px solid #e5e5e5}.btn{color:#fff}.dg{background:#fff;color:#111}input,select,textarea{border-color:#ddd;background:#fafafa;color:#111}.stk{background:#fffc}',
+'네온 다크':':root{--bg:#05060f;--ac:#39ff14}body{background:#05060f}.btn{box-shadow:0 0 18px var(--ac)}.card{border-color:var(--ac);box-shadow:0 0 22px #39ff1433}h1,h2{text-shadow:0 0 18px var(--ac)}',
+'종이 느낌':':root{--bg:#f5efe4;--fg:#3a2f22;--mu:#7b6c58;--ac:#b4532a}body{background:#f5efe4;font-family:Georgia,serif}.card,.glass,.nt{background:#fffaf0;border:1px solid #e3d8c2}.btn{color:#fff}.dg{background:#fffaf0;color:#3a2f22}input,select,textarea{background:#fffaf0;color:#3a2f22;border-color:#d9ccb2}.stk{background:#f5efe4cc}',
+'레트로 픽셀':':root{--bg:#1a1a2e;--ac:#ffd400}body{background:#1a1a2e;font-family:ui-monospace,monospace}*{border-radius:0!important}.card,.btn{border:3px solid var(--ac)}.btn{box-shadow:4px 4px 0 #000}'},
+bs:{'알약':'99px','둥근 네모':'12px','각진 네모':'0'},
+cs:{'유리':'background:#ffffff1a;-webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);border:1px solid #ffffff33','테두리만':'background:none;border:2px solid var(--ac)','그림자':'background:#ffffff10;border:0;box-shadow:0 14px 40px #0008','꽉 찬 색':'background:var(--ac);color:#06101f;border:0'},
+sh:{'없음':'none','약하게':'0 4px 14px #0004','보통':'0 10px 30px #0006','강하게':'0 18px 54px #000a'},
+sp:{'빠르게':'.1','보통':'.25','느리게':'.6'},
+ta:{'왼쪽':'left','가운데':'center'},
+mode:{'어둡게':':root{--bg:#0a0e1a;--fg:#eef2ff;--mu:#93a0c0}body{background:var(--bg)}','밝게':':root{--bg:#f6f8ff;--fg:#10162a;--mu:#5b6685}body{background:var(--bg)}','기기 설정 따라':'@media(prefers-color-scheme:light){:root{--bg:#f6f8ff;--fg:#10162a;--mu:#5b6685}body{background:var(--bg)}}'}};
+var KF={raw:1,js:1,ja:1,url:1,li:1,opt:1,br:1,star:1,tbl:1,pct:1,ui:1,bs:1,cs:1,sh:1,sp:1,ta:1,mode:1};
+var D={};
+BL.forEach(function(a){D[a[0]]={id:a[0],c:a[1],l:a[2],tpl:a[4],ct:a[4].indexOf('{@}')>-1,f:a[3]?a[3].split(';').map(function(s){var x=s.split('|');return{n:x[0],l:x[1],k:x[2],d:x[3]||'',o:x[4]?x[4].split('/'):null}}):[]}});
+
+/* ---------- 만들어진 사이트의 기본 CSS ---------- */
+var BASE=':root{--bg:#0A0E1A;--fg:#eef2ff;--ac:#6ea8ff;--mu:#93a0c0}\n*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--fg);font:16px/1.7 system-ui,"Apple SD Gothic Neo","Noto Sans KR",sans-serif;min-height:100vh}\nh1{font-size:clamp(2rem,6vw,3.6rem);margin:.4em 0;letter-spacing:-.02em}h2{font-size:clamp(1.5rem,4vw,2.2rem);margin:.5em 0}h3{margin:.4em 0}p{margin:.6em 0}a{color:var(--ac)}.lead{font-size:1.15rem;color:var(--mu)}.mu{color:var(--mu)}.c{text-align:center}\n.w{max-width:960px;margin:0 auto;padding:0 20px}.bx{padding:20px}.row{display:flex;flex-wrap:wrap;align-items:center;gap:12px}.col{display:flex;flex-direction:column;gap:12px}\n.g2,.g3,.g4{display:grid;gap:16px;padding:8px 0}.g2{grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr))}.g3{grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr))}.g4{grid-template-columns:repeat(auto-fit,minmax(min(100%,160px),1fr))}\n.card,.glass,.nt{border:1px solid #ffffff22;border-radius:18px;padding:20px;background:#ffffff0d}.glass{backdrop-filter:blur(14px);background:#ffffff14}.nt{border-left:4px solid var(--ac);border-radius:10px}\n.hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:24px;gap:6px}.ctr{display:grid;place-items:center;text-align:center;min-height:60vh}\n.hd,.ft,.nv{padding:14px 20px}.ft{text-align:center}.nv{display:flex;justify-content:space-between;align-items:center}.stk{position:sticky;top:0;z-index:5;background:#0a0e1acc;backdrop-filter:blur(10px)}.sx{display:flex;gap:12px;overflow-x:auto}.sx>*{flex:none}\n.btn{display:inline-block;border:0;border-radius:12px;padding:12px 22px;background:var(--ac);color:#06101f;font:inherit;font-weight:700;cursor:pointer;text-decoration:none}.btn.o{background:none;color:var(--ac);border:2px solid var(--ac)}.btn.p{border-radius:99px}\n.im{max-width:100%;border-radius:14px;display:block}.av{width:120px;height:120px;border-radius:50%;object-fit:cover}.lg{height:44px}.it span{margin-right:8px}\n.bgs{background-size:cover;background-position:center;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:24px;text-align:center}.gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}\n.fm{display:flex;flex-direction:column;gap:10px;max-width:360px}input,select,textarea{font:inherit;padding:12px 14px;border-radius:10px;border:1px solid #ffffff33;background:#ffffff10;color:var(--fg)}.ck{display:flex;gap:8px;align-items:center}\n.gt{background:linear-gradient(90deg,var(--a),var(--b));-webkit-background-clip:text;background-clip:text;color:transparent}blockquote{border-left:4px solid var(--ac);margin:1em 0;padding:.2em 1em;color:var(--mu)}cite{display:block;font-size:.85em}pre{background:#0008;padding:14px;border-radius:12px;overflow:auto}hr{border:0;border-top:1px solid #ffffff22}\n.tag{display:inline-block;padding:2px 12px;border-radius:99px;background:var(--ac);color:#06101f;font-size:.8rem;font-weight:700}.pb{background:#ffffff1a;border-radius:99px;overflow:hidden}.pb span{display:block;background:var(--ac);color:#06101f;padding:2px 12px;font-size:.8rem;font-weight:700;white-space:nowrap}\n.st b{display:block;font-size:2.4rem}.tl{border-left:2px solid var(--ac);padding-left:14px;margin:8px 0}table{border-collapse:collapse;width:100%}td,th{border:1px solid #ffffff22;padding:8px}th{background:#ffffff12}\n.dg{border:1px solid #ffffff33;border-radius:18px;background:#10162a;color:var(--fg);padding:24px;max-width:min(92vw,420px)}.dg::backdrop{background:#000a}.top{position:fixed;right:18px;bottom:18px;width:44px;height:44px;border-radius:50%;background:var(--ac);color:#06101f;display:grid;place-items:center;text-decoration:none;font-weight:900}\ndetails{margin:8px 0}summary{cursor:pointer}.clk{font:700 2rem ui-monospace,monospace}\n';
+
+/* ---------- 코드 만들기 ---------- */
+function E(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function fm(v,f){v=String(v==null?'':v);var L=v.split('\n').filter(Boolean);
+  if(UIM[f])return UIM[f][v]||'';if(f==='pct')return(Math.max(0,Math.min(100,+v||0))/100*.35).toFixed(2);
+  if(f==='raw')return v;if(f==='js')return JSON.stringify(v).replace(/</g,'\\u003c');if(f==='ja')return E(JSON.stringify(v));if(f==='url')return encodeURIComponent(v).replace(/%20/g,'+');
+  if(f==='li')return L.map(function(x){return'<li>'+E(x)+'</li>'}).join('');
+  if(f==='opt')return L.map(function(x){return'<option>'+E(x)+'</option>'}).join('');
+  if(f==='br')return E(v).replace(/\n/g,'<br>');
+  if(f==='star')return'⭐'.repeat(Math.max(0,Math.min(5,+v||0)));
+  if(f==='tbl')return'<table>'+L.map(function(r,i){var t=i?'td':'th';return'<tr>'+r.split(',').map(function(c){return'<'+t+'>'+E(c.trim())+'</'+t+'>'}).join('')+'</tr>'}).join('')+'</table>';
+  return E(v)}
+var PH='data:image/svg+xml,'+encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="600" height="320"><rect width="600" height="320" fill="#26324f"/><text x="300" y="170" fill="#8fa0c4" font-size="26" text-anchor="middle">사진을 선택해 주세요</text></svg>');
+function gen(){
+  var out={css:[],js:[],head:[]},lang='ko',T=$('ttl').value||'나의 웹사이트';
+  function sub(s,b,d,inner){return s.replace(/\{([\p{L}\p{N}_]+|@)(?::(\w+))?\}/gu,function(m,k,f){if(k==='@')return inner||'';if(f&&!KF[f])return m;var fd=d.f.filter(function(x){return x.n===k})[0];if(!fd)return m;var v=b.v[k];if(v==null)v=fd.d;if(fd.k==='i'&&!v)v=PH;return fm(v,f)})}
+  function put(a,s){if(out[a].indexOf(s)<0)out[a].push(s)}
+  function emit(list,dp){var ind=Array(dp+1).join('  '),res=[];
+    list.forEach(function(b){var d=D[b.t];if(!d)return;
+      d.tpl.split('\n').forEach(function(line){var m=line.match(/^@(css|js|head|lang|title) /);
+        if(m){var s=sub(line.slice(m[0].length),b,d);if(m[1]==='lang')lang=s;else if(m[1]==='title')T=s;else put(m[1],s);return}
+        if(d.ct&&line.indexOf('{@}')>-1){var p=line.split('{@}');res.push(ind+sub(p[0],b,d));res.push(emit(b.c||[],dp+1));res.push(ind+sub(p[1],b,d))}
+        else res.push(ind+sub(line,b,d))})});
+    return res.filter(function(x){return x!==''}).join('\n')}
+  var body=emit(root.c,1);
+  return'<!DOCTYPE html>\n<html lang="'+E(lang)+'">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width,initial-scale=1">\n<title>'+E(T)+'</title>\n'+(out.head.length?out.head.join('\n')+'\n':'')+'<style>\n'+BASE+out.css.join('\n')+'\n</style>\n</head>\n<body>\n'+body+'\n'+(out.js.length?'<script>\n'+out.js.join(';\n')+'\n<'+'/script>\n':'')+'</body>\n</html>'}
+
+/* ---------- 편집기 ---------- */
+var $=function(i){return document.getElementById(i)};
+var root={id:0,t:'start',c:[]},uid=1,sel=0,cat='all',code='',pend=null,tm;
+function mk(t){var d=D[t],v={};d.f.forEach(function(f){v[f.n]=f.d});var b={id:uid++,t:t,v:v};if(d.ct)b.c=[];return b}
+function find(id,list){if(id===0)return{b:root,a:null,i:0};list=list||root.c;for(var i=0;i<list.length;i++){if(list[i].id===id)return{b:list[i],a:list,i:i};if(list[i].c){var r=find(id,list[i].c);if(r)return r}}return null}
+function count(l){return l.reduce(function(n,b){return n+1+(b.c?count(b.c):0)},0)}
+function clone(b){var n=JSON.parse(JSON.stringify(b));(function r(x){x.id=uid++;(x.c||[]).forEach(r)})(n);return n}
+function FI(b,f){var v=b.v[f.n],a=' data-f="'+f.n+'"';
+  if(f.k==='x')return'<textarea'+a+' rows="2">'+E(v)+'</textarea>';
+  if(f.k==='s')return'<select'+a+'>'+f.o.map(function(o){return'<option'+(o===v?' selected':'')+'>'+E(o)+'</option>'}).join('')+'</select>';
+  if(f.k==='c')return'<input'+a+' type="color" value="'+E(v)+'">';
+  if(f.k==='n')return'<input'+a+' type="number" step="any" value="'+E(v)+'">';
+  if(f.k==='i')return'<button class="ib" data-a="img" data-f="'+f.n+'">'+(v?'✔ 바꾸기':'📷 선택')+'</button>';
+  return'<input'+a+' value="'+E(v)+'">'}
+function R(list){return list.map(function(b){var d=D[b.t],k=CATS[d.c][1];
+  return'<div class="bk'+(sel===b.id?' sel':'')+'" data-id="'+b.id+'" style="--k:'+k+'"><div class="bh"><b class="bn"'+(d.ct?' data-a="sel"':'')+'>'+d.l+'</b>'+d.f.map(function(f){return'<label class="fl">'+f.l+FI(b,f)+'</label>'}).join('')+'<span class="ba"><button data-a="up" aria-label="위로">↑</button><button data-a="dn" aria-label="아래로">↓</button><button data-a="dup" aria-label="복제">⧉</button><button data-a="del" aria-label="삭제">✕</button></span></div>'+(d.ct?'<div class="bc">'+R(b.c)+'<div class="bz" data-a="sel">'+(sel===b.id?'👇 여기에 블록이 추가돼요':'눌러서 이 안에 추가')+'</div></div>':'')+'</div>'}).join('')}
+function render(){$('bl').innerHTML='<div class="bk'+(sel===0?' sel':'')+'" data-id="0" style="--k:#8b6cff"><div class="bh"><b class="bn" data-a="sel">🚩 시작</b><span class="fl">블록 아래에 이어 붙이세요</span></div><div class="bc">'+R(root.c)+'<div class="bz" data-a="sel">'+(sel===0?'👇 여기에 블록이 추가돼요':'눌러서 맨 아래에 추가')+'</div></div></div>'}
+function toast(s){var t=$('tt');t.textContent=s;t.classList.add('on');clearTimeout(t._h);t._h=setTimeout(function(){t.classList.remove('on')},1800)}
+function upd(now){$('stt').textContent='만드는 중…';clearTimeout(tm);tm=setTimeout(function(){code=gen();$('fr').srcdoc=code;var v=code.replace(/(data:image\/[a-z+]+;base64,)[A-Za-z0-9+\/=]{30,}/g,'$1…(사진 데이터)');$('pre').textContent=v;$('cc').textContent=v.split('\n').length+'줄 · 블록 '+count(root.c)+'개 사용';$('stt').textContent='준비됨';try{localStorage.setItem('bw-auto',JSON.stringify({t:$('ttl').value,r:root.c,u:uid,cb:CB}))}catch(e){}},now?0:220)}
+function add(t){var b=mk(t),s=find(sel)||{b:root};s.b.c.push(b);if(b.c)sel=b.id;render();upd();toast('＋ '+D[t].l);var el=document.querySelector('[data-id="'+b.id+'"]');if(el){el.classList.add('new');el.scrollIntoView({block:'nearest',behavior:'smooth'})}}
+/* 블록 목록(팔레트) */
+function pal(){var q=$('q').value.trim(),h='';Object.keys(CATS).forEach(function(c){if(cat!=='all'&&cat!==c)return;Object.keys(D).forEach(function(id){var d=D[id];if(d.c!==c||id==='start')return;if(q&&d.l.indexOf(q)<0&&id.indexOf(q)<0)return;var b='<button class="pb" data-t="'+id+'" style="--k:'+CATS[c][1]+'">'+d.l+'</button>';h+=c==='z'?'<span class="cw">'+b+'<button class="ed" data-e="'+id+'" aria-label="고치기">✎</button></span>':b})});
+  if(!h&&(cat==='z'||cat==='all')&&!q)h='<small>아직 없어요. 위의 “나만의 블록 만들기”를 눌러 보세요</small>';$('pg').innerHTML=h||'<small>찾는 블록이 없어요</small>'}
+function nin(c){return Object.keys(D).filter(function(id){return D[id].c===c&&id!=='start'}).length}
+function chips(){$('ch').innerHTML='<button class="ch'+(cat==='all'?' on':'')+'" data-c="all">전체 '+(Object.keys(D).length-1)+'</button>'+Object.keys(CATS).map(function(c){return'<button class="ch'+(cat===c?' on':'')+'" data-c="'+c+'">'+CATS[c][0]+' '+nin(c)+'</button>'}).join('');$('nb').textContent=BL.length;$('nc').textContent=CB.length}
+$('ch').onclick=function(e){var c=e.target.closest('[data-c]');if(!c)return;cat=c.dataset.c;chips();pal()};
+$('q').oninput=pal;$('pg').onclick=function(e){var x=e.target.closest('[data-e]');if(x)return openCB(x.dataset.e);var b=e.target.closest('[data-t]');if(b)add(b.dataset.t)};
+$('fab').onclick=function(){document.body.classList.add('po')};
+$('pcl').onclick=function(){document.body.classList.remove('po')};
+/* 블록 조작 */
+$('bl').addEventListener('click',function(e){var a=e.target.closest('[data-a]');if(!a)return;var bk=a.closest('.bk'),id=+bk.dataset.id,k=a.dataset.a,s=find(id);if(!s)return;
+  if(k==='sel'){sel=(sel===id&&id!==0)?0:id;render();return}
+  if(k==='img'){pend={id:id,n:a.dataset.f};$('fi').click();return}
+  if(k==='up'&&s.i>0){s.a.splice(s.i-1,0,s.a.splice(s.i,1)[0])}
+  if(k==='dn'&&s.i<s.a.length-1){s.a.splice(s.i+1,0,s.a.splice(s.i,1)[0])}
+  if(k==='dup'){s.a.splice(s.i+1,0,clone(s.b))}
+  if(k==='del'){s.a.splice(s.i,1);if(!find(sel))sel=0}
+  render();upd()});
+$('bl').addEventListener('input',function(e){var f=e.target.dataset.f;if(!f)return;var s=find(+e.target.closest('.bk').dataset.id);if(s){s.b.v[f]=e.target.value;upd()}});
+$('fi').onchange=function(){var f=this.files[0];this.value='';if(!f||!pend)return;var r=new FileReader();r.onload=function(){var im=new Image();im.onload=function(){var m=1000,s=Math.min(1,m/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*s;c.height=im.height*s;c.getContext('2d').drawImage(im,0,0,c.width,c.height);var t=find(pend.id);if(t){t.b.v[pend.n]=c.toDataURL('image/jpeg',.82);render();upd()}};im.src=r.result};r.readAsDataURL(f)};
+$('ttl').oninput=function(){upd()};
+/* 탭 */
+function wide(){return matchMedia('(min-width:1000px)').matches}
+function view(v){if(wide()&&v==='b')v='p';document.body.dataset.v=v;if(v!=='b')document.body.classList.remove('po');[].forEach.call(document.querySelectorAll('.tabs button'),function(b){b.classList.toggle('on',b.dataset.v===v)})}
+document.addEventListener('click',function(e){var b=e.target.closest('.tabs button');if(b)view(b.dataset.v)});
+matchMedia('(min-width:1000px)').addEventListener('change',function(){view(document.body.dataset.v)});
+/* 복사 */
+$('bCopy').onclick=function(){function ok(){toast('코드를 복사했어요 ✔')}function fb(){var t=document.createElement('textarea');t.value=code;document.body.appendChild(t);t.select();try{document.execCommand('copy');ok()}catch(e){toast('길게 눌러 직접 복사해 주세요')}t.remove()}
+  if(navigator.clipboard)navigator.clipboard.writeText(code).then(ok,fb);else fb()};
+/* ---------- 나만의 블록 ---------- */
+var CB=[],editing=null,fs={};
+var EXS={card:['인사 카드','<div class="card"><h3>{제목}</h3><p class="mu">{내용}</p></div>',{제목:['t','안녕!'],내용:['t','나만의 카드예요']}],
+  notice:['알림 띠','<div class="nt">📢 {알림}</div>',{알림:['t','오늘은 쉬는 날']}],
+  box:['안에 넣는 상자','<div class="glass" style="border-radius:{둥글기}px">{@}</div>',{둥글기:['n','28']}]};
+function regCB(c){D[c.id]={id:c.id,c:'z',l:c.l,tpl:c.tpl,ct:c.tpl.indexOf('{@}')>-1,f:c.f.map(function(x){return{n:x.n,l:x.n,k:x.k,d:x.d,o:null}})}}
+function saveCB(){try{localStorage.setItem('bw-cb',JSON.stringify(CB))}catch(e){}}
+function mergeCB(list){(list||[]).forEach(function(c){var i=CB.map(function(x){return x.id}).indexOf(c.id);if(i<0)CB.push(c);else CB[i]=c;regCB(c)});saveCB()}
+function detect(t){var r=[],m,re=/\{([\p{L}\p{N}_]+)(?::(\w+))?\}/gu;while(m=re.exec(t)){if(m[2]&&!KF[m[2]])continue;if(r.indexOf(m[1])<0)r.push(m[1])}return r}
+function readFs(){[].forEach.call($('cmf').querySelectorAll('.fr'),function(r){fs[r.dataset.n]={k:r.querySelector('select').value,d:r.querySelector('input').value}})}
+function drawFs(){var ns=detect($('cmh').value),K=[['t','글'],['x','여러 줄'],['u','주소'],['n','숫자'],['c','색']];
+  $('cmf').innerHTML=ns.length?ns.map(function(n){var f=fs[n]||{k:'t',d:''};return'<div class="fr" data-n="'+E(n)+'"><b>'+E(n)+'</b><select>'+K.map(function(k){return'<option value="'+k[0]+'"'+(k[0]===f.k?' selected':'')+'>'+k[1]+'</option>'}).join('')+'</select><input placeholder="기본값" value="'+E(f.d)+'"></div>'}).join(''):'<small>위 코드에 {이름} 을 쓰면 여기에 나타나요.</small>'}
+function openCB(id){editing=id||null;fs={};var c=id?CB.filter(function(x){return x.id===id})[0]:null;
+  $('cmt').textContent=c?'나만의 블록 고치기':'나만의 블록 만들기';$('cmn').value=c?c.l:'';$('cmh').value=c?c.tpl:'';$('cmd').hidden=!c;
+  if(c)c.f.forEach(function(x){fs[x.n]={k:x.k,d:x.d}});drawFs();$('cm').classList.add('on');setTimeout(function(){$('cmn').focus()},60)}
+function closeCB(){$('cm').classList.remove('on')}
+function stripUses(l,id){return l.filter(function(b){return b.t!==id}).map(function(b){if(b.c)b.c=stripUses(b.c,id);return b})}
+$('bNew').onclick=function(){openCB()};$('cmx').onclick=closeCB;
+$('cm').onclick=function(e){if(e.target===$('cm'))closeCB()};
+$('cmh').oninput=function(){readFs();drawFs()};
+$('cmf').oninput=readFs;$('cmf').onchange=readFs;
+$('cm').querySelector('.ex').onclick=function(e){var b=e.target.closest('[data-x]');if(!b)return;var x=EXS[b.dataset.x];$('cmn').value=x[0];$('cmh').value=x[1];fs={};for(var k in x[2])fs[k]={k:x[2][k][0],d:x[2][k][1]};drawFs()};
+$('cms').onclick=function(){readFs();var n=$('cmn').value.trim(),t=$('cmh').value.trim();if(!n)return toast('블록 이름을 적어 주세요');if(!t)return toast('HTML 조각을 적어 주세요');
+  var f=detect(t).map(function(x){var o=fs[x]||{k:'t',d:''};return{n:x,k:o.k,d:o.d||(o.k==='c'?'#6ea8ff':o.k==='n'?'0':x)}});
+  if(editing){var c=CB.filter(function(x){return x.id===editing})[0];c.l=n;c.tpl=t;c.f=f;regCB(c)}
+  else{var m=0;CB.forEach(function(x){m=Math.max(m,+x.id.slice(2)||0)});var c={id:'my'+(m+1),l:n,tpl:t,f:f};CB.push(c);regCB(c)}
+  saveCB();closeCB();cat='z';chips();pal();render();upd(true);toast(editing?'고쳤어요 ✔':'나만의 블록을 만들었어요 ✔')};
+$('cmd').onclick=function(){if(!editing)return;CB=CB.filter(function(x){return x.id!==editing});delete D[editing];root.c=stripUses(root.c,editing);saveCB();closeCB();chips();pal();render();upd(true);toast('지웠어요')};
+
+/* 저장 · 불러오기 · 예시 */
+$('bSave').onclick=function(){try{localStorage.setItem('bw-save',JSON.stringify({t:$('ttl').value,r:root.c,u:uid,cb:CB}));toast('저장했어요 ✔')}catch(e){toast('저장 공간이 부족해요 (사진이 너무 커요)')}};
+function load(d){mergeCB(d.cb);chips();pal();root.c=d.r||[];uid=d.u||100;$('ttl').value=d.t||'나의 웹사이트';sel=0;render();upd(true)}
+$('bLoad').onclick=function(){try{var d=JSON.parse(localStorage.getItem('bw-save'));if(!d)return toast('저장된 작품이 없어요');load(d);toast('불러왔어요 ✔')}catch(e){toast('불러오지 못했어요')}};
+function S(t,v,c){var b=mk(t);if(v)for(var k in v)b.v[k]=v[k];if(c)b.c=c;return b}
+$('bDemo').onclick=function(){root.c=[S('title',{text:'DOYUN GO'}),S('desc',{text:'Doyun Personal Hub — Think Different. Create Future.'}),S('icon',{e:'🌌'}),S('bg',{c:'#0a0e1a'}),S('shoot'),S('welcome'),S('sticky',0,[S('nav',{brand:'DOYUN GO'},[S('shoottoggle'),S('btno',{text:'로그인',url:'#login'})])]),S('hero',0,[S('fade',0,[S('lead',{text:'Doyun · Personal Hub'}),S('gtext',{text:'DOYUN GO'}),S('lead',{text:'Think Different. Create Future.'}),S('goto',{text:'시작하기',id:'start'})])]),S('anchor',{id:'start'}),S('section',{n:'60'},[S('wrap',0,[S('h2',{text:'내가 만든 것들'}),S('g3',0,[S('infocard',{e:'🎮',t:'게임',d:'블록으로 만든 게임'}),S('infocard',{e:'📚',t:'공부',d:'공부 기록 모음'}),S('infocard',{e:'🎨',t:'작품',d:'그림과 디자인'})])])]),S('anchor',{id:'login'}),S('section',{n:'60'},[S('wrap',0,[S('h2',{text:'로그인'}),S('login')])]),S('footer',0,[S('copyright')])];$('ttl').value='도윤 허브 예시';sel=0;render();upd(true);view('p');toast('doyungo.com 느낌의 예시를 불러왔어요')};
+/* 시작 */
+$('bGl').onclick=function(){$('gp').classList.toggle('on')};
+function setGl(v){document.documentElement.style.setProperty('--gl',v);$('gl').value=v;try{localStorage.setItem('bw-gl',v)}catch(e){}}
+$('gl').oninput=function(){setGl(this.value)};
+document.addEventListener('click',function(e){if(!e.target.closest('#gp,#bGl'))$('gp').classList.remove('on')});
+(function(){var g=null;try{g=localStorage.getItem('bw-gl')}catch(e){}if(g)setGl(g);var d=null;try{mergeCB(JSON.parse(localStorage.getItem('bw-cb')))}catch(e){}try{d=JSON.parse(localStorage.getItem('bw-auto'))}catch(e){}
+  if(d&&d.r&&d.r.length){root.c=d.r;uid=d.u||100;$('ttl').value=d.t||$('ttl').value}
+  else root.c=[S('h1',{text:'안녕하세요!'}),S('lead',{text:'블록을 연결해서 나만의 웹사이트를 만들어 보세요.'}),S('btn',{text:'시작하기'})];
+  chips();pal();render();upd(true);view(wide()?'p':'b')})();
+</script>
+</body>
+</html>
