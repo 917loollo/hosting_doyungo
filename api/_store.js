@@ -52,3 +52,16 @@ export async function claimSlug(slug, uid) {
 }
 
 export const sitePath = (uid, slug) => `sites/${uid}/${slug}.html`;
+
+export async function listAll(prefix) {
+  const blobs = [];
+  let cursor;
+  do {
+    const out = await B.list({ prefix, cursor, limit: 1000, token: token() });
+    blobs.push(...out.blobs);
+    cursor = out.hasMore ? out.cursor : undefined;
+  } while (cursor);
+  return blobs;
+}
+
+export const legacyPath = slug => `sites/${slug}.html`;
