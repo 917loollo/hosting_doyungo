@@ -1,49 +1,27 @@
-import { get, del } from '@vercel/blob';
-import { ok, unauthorized } from '../_auth.js';
-
-const token = () => process.env.BLOB_READ_WRITE_TOKEN;
-
-function valid(s) {
-  return typeof s === 'string'
-    && /^[a-z0-9](?:[a-z0-9-]{0,38}[a-z0-9])?$/.test(s)
-    && !['api', 'favicon', 'index', 'host'].includes(s);
-}
-
-function titleFromHtml(html) {
-  const m = String(html).match(/<title[^>]*>([\s\S]*?)<\/title>/i);
-  return m ? m[1].replace(/\s+/g, ' ').trim() : '';
-}
-
-async function streamToText(stream) {
-  const chunks = [];
-  for await (const chunk of stream) {
-    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
-  }
-  return Buffer.concat(chunks).toString('utf8');
-}
+import { getUser, unauthorized } from '../_auth.js';
+import { B, token, valid, titleFromHtml, readBlob, ownerOf, sitePath } from '../_store.js';
 
 export default async function handler(req, res) {
-  if (!ok(req)) return unauthorized(res);
+  const user = await getUser(req);
+  if (!user) return unauthorized(res);
 
   const slug = req.query?.slug;
   if (!valid(slug)) return res.status(400).json({ error: '잘못된 사이트 이름입니다.' });
 
   try {
+    if ((await ownerOf(slug)) !== user.uid) {
+      return res.status(404).json({ error: '사이트를 찾을 수 없습니다.' });
+    }
+
     if (req.method === 'GET') {
-      const r = await get(`sites/${slug}.html`, {
-        access: 'private',
-        useCache: false,
-        token: token()
-      });
-      if (!r || r.statusCode !== 200 || !r.stream) {
-        return res.status(404).json({ error: '사이트를 찾을 수 없습니다.' });
-      }
-      const html = await streamToText(r.stream);
+      const r = await readBlob(sitePath(user.uid, slug));
+      if (!r) return res.status(404).json({ error: '사이트를 찾을 수 없습니다.' });
+      const html = r.buf.toString('utf8');
       return res.status(200).json({ slug, html, title: titleFromHtml(html) });
     }
 
     if (req.method === 'DELETE') {
-      await del(`sites/${slug}.html`, { token: token() });
+      await B.del([sitePath(user.uid, slug), `slugs/${slug}.json`], { token: token() });
       return res.status(200).json({ ok: true });
     }
 
