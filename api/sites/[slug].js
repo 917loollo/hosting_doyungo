@@ -1,5 +1,5 @@
 import { getUser, unauthorized } from '../_auth.js';
-import { B, token, valid, titleFromHtml, readBlob, ownerOf, sitePath } from '../_store.js';
+import { B, token, valid, titleFromHtml, readBlob, ownerOf, sitePath, legacyPath } from '../_store.js';
 
 export default async function handler(req, res) {
   const user = await getUser(req);
@@ -9,19 +9,21 @@ export default async function handler(req, res) {
   if (!valid(slug)) return res.status(400).json({ error: '잘못된 사이트 이름입니다.' });
 
   try {
-    if ((await ownerOf(slug)) !== user.uid) {
-      return res.status(404).json({ error: '사이트를 찾을 수 없습니다.' });
-    }
+    const owner = await ownerOf(slug);
+    let path;
+    if (owner && owner === user.uid) path = sitePath(owner, slug);
+    else if (user.isAdmin) path = owner ? sitePath(owner, slug) : legacyPath(slug); // 관리자는 전부 접근
+    else return res.status(404).json({ error: '사이트를 찾을 수 없습니다.' });
 
     if (req.method === 'GET') {
-      const r = await readBlob(sitePath(user.uid, slug));
+      const r = await readBlob(path);
       if (!r) return res.status(404).json({ error: '사이트를 찾을 수 없습니다.' });
       const html = r.buf.toString('utf8');
       return res.status(200).json({ slug, html, title: titleFromHtml(html) });
     }
 
     if (req.method === 'DELETE') {
-      await B.del([sitePath(user.uid, slug), `slugs/${slug}.json`], { token: token() });
+      await B.del(owner ? [path, `slugs/${slug}.json`] : [path], { token: token() });
       return res.status(200).json({ ok: true });
     }
 
