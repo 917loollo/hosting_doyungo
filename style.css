@@ -2,3 +2,4 @@
 
 .tabs{display:flex;gap:6px;margin:14px 0 16px;padding:5px;border-radius:18px;background:rgba(255,255,255,.5)}.tab{flex:1;border:0;border-radius:14px;padding:10px;font:inherit;font-weight:700;color:#64748b;background:transparent;cursor:pointer}.tab.active{background:#fff;color:#4f46e5;box-shadow:0 4px 14px rgba(60,70,90,.08)}#recaptcha{margin-top:8px}.who{font-size:13px;color:#64748b}
 .tag{display:inline-block;margin-left:6px;padding:1px 8px;border-radius:999px;background:rgba(99,102,241,.1);color:#4f46e5;font-size:11px;font-weight:700}
+.admin-area{margin-top:14px;padding-top:12px;border-top:1px solid rgba(255,255,255,.85)}

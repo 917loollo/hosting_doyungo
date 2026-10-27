@@ -45,10 +45,9 @@ function fail(e) { console.error(e); setMsg(ERRORS[e?.code] || e?.message || '�
 
 async function api(url, opt = {}) {
   const user = auth.currentUser;
-  if (!user) throw new Error('로그인이 필요합니다.');
-  const idToken = await user.getIdToken();
-  const headers = { Authorization: 'Bearer ' + idToken, ...(opt.body ? { 'Content-Type': 'application/json' } : {}), ...(opt.headers || {}) };
-  const r = await fetch(url, { ...opt, headers });
+  const idToken = user ? await user.getIdToken() : null;
+  const headers = { ...(idToken ? { Authorization: 'Bearer ' + idToken } : {}), ...(opt.body ? { 'Content-Type': 'application/json' } : {}), ...(opt.headers || {}) };
+  const r = await fetch(url, { credentials: 'same-origin', ...opt, headers });
   let d = {}; try { d = await r.json(); } catch {}
   if (!r.ok) throw new Error(d.error || '요청에 실패했습니다.');
   return d;
@@ -109,7 +108,31 @@ $('#verifyCodeBtn').onclick = async () => {
   try { await confirmation.confirm($('#code').value.trim()); } catch (e) { fail(e); }
 };
 
-$('#logoutBtn').onclick = () => signOut(auth);
+$('#logoutBtn').onclick = async () => {
+  try { await fetch('/api/auth', { method: 'DELETE', credentials: 'same-origin' }); } catch {}
+  try { await signOut(auth); } catch {}
+  location.reload();
+};
+
+// ---------- 관리자 (비밀번호) ----------
+let adminCookie = false;
+$('#adminToggle').onclick = () => { $('#adminBox').classList.toggle('hidden'); $('#adminPassword').focus(); };
+$('#adminPassword').addEventListener('keydown', e => { if (e.key === 'Enter') $('#adminLoginBtn').click(); });
+$('#adminLoginBtn').onclick = async () => {
+  const msg = $('#adminMsg');
+  try {
+    const r = await fetch('/api/auth', {
+      method: 'POST', credentials: 'same-origin',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: $('#adminPassword').value })
+    });
+    let d = {}; try { d = await r.json(); } catch {}
+    if (!r.ok) throw new Error(d.error || '로그인에 실패했습니다.');
+    $('#adminPassword').value = '';
+    adminCookie = true;
+    await render(auth.currentUser);
+  } catch (e) { msg.textContent = e.message; msg.className = 'msg err'; }
+};
 
 // ---------- 에디터 ----------
 $('#previewBtn').onclick = preview; $('#refreshPreview').onclick = preview;
@@ -131,7 +154,7 @@ async function loadSites() {
   try {
     const d = await api('/api/sites');
     box.innerHTML = '';
-    if (d.admin) statusEl.textContent = '● 관리자 · ' + (auth.currentUser.email || '');
+    if (d.admin) statusEl.textContent = '● 관리자' + (auth.currentUser?.email ? ' · ' + auth.currentUser.email : '');
     if (!d.sites.length) { box.innerHTML = '<div class="empty">아직 공개한 사이트가 없습니다. 위에서 첫 사이트를 만들어보세요.</div>'; return; }
     d.sites.forEach(s => {
       const el = document.createElement('div'); el.className = 'site';
@@ -157,11 +180,9 @@ async function deleteSite(slug) {
 $('#refreshBtn').onclick = loadSites;
 
 // ---------- 로그인 상태 ----------
-onAuthStateChanged(auth, async user => {
-  if (user) {
-    // 이메일 인증을 방금 마쳤다면 최신 토큰으로 갱신
-    if (user.email && !user.emailVerified) { try { await user.reload(); await user.getIdToken(true); } catch {} }
-    statusEl.textContent = '● ' + (user.email || user.phoneNumber || '로그인됨');
+async function render(user) {
+  if (user || adminCookie) {
+    statusEl.textContent = adminCookie ? '● 관리자' : '● ' + (user.email || user.phoneNumber || '로그인됨');
     statusEl.style.color = '#16834a';
     loginBox.classList.add('hidden'); app.classList.remove('hidden');
     setMsg('');
@@ -171,5 +192,14 @@ onAuthStateChanged(auth, async user => {
     loginBox.classList.remove('hidden'); app.classList.add('hidden');
     $('#sitesList').innerHTML = '<div class="empty">로그인하면 만든 사이트 목록이 표시됩니다.</div>';
   }
+}
+onAuthStateChanged(auth, async user => {
+  // 이메일 인증을 방금 마쳤다면 최신 토큰으로 갱신
+  if (user && user.email && !user.emailVerified) { try { await user.reload(); await user.getIdToken(true); } catch {} }
+  try {
+    const r = await fetch('/api/auth', { credentials: 'same-origin' });
+    adminCookie = !!(await r.json()).authenticated;
+  } catch { adminCookie = false; }
+  await render(user);
 });
 preview();
