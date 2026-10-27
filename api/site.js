@@ -24,6 +24,7 @@ export default async function handler(req, res) {
   try {
     const result = await get(`sites/${slug}.html`, {
       access: 'private',
+      useCache: false,
       token: token()
     });
 

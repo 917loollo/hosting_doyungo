@@ -32,6 +32,7 @@ export default async function handler(req, res) {
     if (req.method === 'GET') {
       const r = await get(`sites/${slug}.html`, {
         access: 'private',
+        useCache: false,
         token: token()
       });
       if (!r || r.statusCode !== 200 || !r.stream) {
