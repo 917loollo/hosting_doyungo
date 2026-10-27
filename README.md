@@ -17,6 +17,8 @@
 - `BLOB_READ_WRITE_TOKEN` (필수)
 - `PUBLIC_BASE_URL` (선택, 예: `https://doyungo.com`)
 - `FIREBASE_PROJECT_ID` (선택, 기본값 `doyungo-host`)
+- `ADMIN_EMAIL` (선택, 기본값 `loollo@doyungo.com`) — 이 이메일로 로그인하고 **이메일 인증이 끝난** 계정은 관리자입니다.
+  관리자는 모든 사용자 사이트와 구버전 사이트를 보고 수정·삭제할 수 있습니다.
 - `ADMIN_PASSWORD`는 더 이상 쓰지 않습니다.
 
 ## Firebase 콘솔 설정 (필수)

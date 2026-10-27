@@ -3,7 +3,7 @@ import {
   getAuth, onAuthStateChanged, signOut,
   signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail,
   GoogleAuthProvider, signInWithPopup,
-  RecaptchaVerifier, signInWithPhoneNumber
+  RecaptchaVerifier, signInWithPhoneNumber, sendEmailVerification
 } from 'https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js';
 
 const firebaseConfig = {
@@ -69,7 +69,12 @@ document.querySelectorAll('.tab').forEach(t => t.onclick = () => {
 // ---------- 이메일 ----------
 const creds = () => [$('#email').value.trim(), $('#password').value];
 $('#emailLoginBtn').onclick = async () => { try { await signInWithEmailAndPassword(auth, ...creds()); } catch (e) { fail(e); } };
-$('#emailSignupBtn').onclick = async () => { try { await createUserWithEmailAndPassword(auth, ...creds()); } catch (e) { fail(e); } };
+$('#emailSignupBtn').onclick = async () => {
+  try {
+    const c = await createUserWithEmailAndPassword(auth, ...creds());
+    try { await sendEmailVerification(c.user); alert('인증 메일을 보냈습니다. 메일의 링크를 누른 뒤 페이지를 새로고침하세요.'); } catch {}
+  } catch (e) { fail(e); }
+};
 $('#password').addEventListener('keydown', e => { if (e.key === 'Enter') $('#emailLoginBtn').click(); });
 $('#resetBtn').onclick = async () => {
   const email = $('#email').value.trim();
@@ -126,10 +131,11 @@ async function loadSites() {
   try {
     const d = await api('/api/sites');
     box.innerHTML = '';
+    if (d.admin) statusEl.textContent = '● 관리자 · ' + (auth.currentUser.email || '');
     if (!d.sites.length) { box.innerHTML = '<div class="empty">아직 공개한 사이트가 없습니다. 위에서 첫 사이트를 만들어보세요.</div>'; return; }
     d.sites.forEach(s => {
       const el = document.createElement('div'); el.className = 'site';
-      el.innerHTML = `<div><div class="site-name">${esc(s.slug)}</div><a class="site-url" href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.url)}</a><div class="site-meta">${s.updatedAt ? new Date(s.updatedAt).toLocaleString('ko-KR') : ''}</div></div><div class="site-actions"><button class="btn-secondary" data-edit="${esc(s.slug)}">편집</button><button class="btn-secondary" data-copy="${esc(s.url)}">URL 복사</button><button class="btn-secondary" data-del="${esc(s.slug)}">삭제</button></div>`;
+      el.innerHTML = `<div><div class="site-name">${esc(s.slug)}${s.owner&&!s.mine?` <span class="tag">${s.owner==='legacy'?'구버전':'다른 사용자 '+esc(s.owner.slice(0,6))}</span>`:''}</div><a class="site-url" href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.url)}</a><div class="site-meta">${s.updatedAt ? new Date(s.updatedAt).toLocaleString('ko-KR') : ''}</div></div><div class="site-actions"><button class="btn-secondary" data-edit="${esc(s.slug)}">편집</button><button class="btn-secondary" data-copy="${esc(s.url)}">URL 복사</button><button class="btn-secondary" data-del="${esc(s.slug)}">삭제</button></div>`;
       box.appendChild(el);
     });
     box.querySelectorAll('[data-edit]').forEach(b => b.onclick = () => loadSite(b.dataset.edit));
@@ -153,6 +159,8 @@ $('#refreshBtn').onclick = loadSites;
 // ---------- 로그인 상태 ----------
 onAuthStateChanged(auth, async user => {
   if (user) {
+    // 이메일 인증을 방금 마쳤다면 최신 토큰으로 갱신
+    if (user.email && !user.emailVerified) { try { await user.reload(); await user.getIdToken(true); } catch {} }
     statusEl.textContent = '● ' + (user.email || user.phoneNumber || '로그인됨');
     statusEl.style.color = '#16834a';
     loginBox.classList.add('hidden'); app.classList.remove('hidden');
