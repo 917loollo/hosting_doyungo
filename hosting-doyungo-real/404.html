@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>페이지를 찾을 수 없어요</title>
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#eef1fb; --text:#16161a; --sub:rgba(22,22,26,.6);
+  --glass:rgba(255,255,255,.38); --glass-edge:rgba(255,255,255,.85); --glass-shade:rgba(120,130,170,.28);
+  --b1:#7aa7ff; --b2:#ff9ccf; --b3:#ffc98a; --b4:#9be7d0;
+  --accent:#0a7cff; --accent-text:#fff;
+  color-scheme:light;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0b0c14; --text:#f5f5f7; --sub:rgba(245,245,247,.62);
+    --glass:rgba(255,255,255,.09); --glass-edge:rgba(255,255,255,.4); --glass-shade:rgba(0,0,0,.45);
+    --b1:#3d6bff; --b2:#c2389a; --b3:#d9772b; --b4:#1fa58a; --accent:#2f8bff; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0b0c14; --text:#f5f5f7; --sub:rgba(245,245,247,.62);
+  --glass:rgba(255,255,255,.09); --glass-edge:rgba(255,255,255,.4); --glass-shade:rgba(0,0,0,.45);
+  --b1:#3d6bff; --b2:#c2389a; --b3:#d9772b; --b4:#1fa58a; --accent:#2f8bff; color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:inherit}
+html,body{height:100%;margin:0}
+body{
+  background:var(--bg);color:var(--text);overflow:hidden;
+  font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Pretendard","Apple SD Gothic Neo","Noto Sans KR",system-ui,sans-serif;
+  -webkit-font-smoothing:antialiased;
+}
+.blob{position:fixed;border-radius:50%;filter:blur(60px);opacity:.85;will-change:transform;transition:transform .9s cubic-bezier(.2,.8,.2,1)}
+.b1{width:46vmax;height:46vmax;left:-12vmax;top:-14vmax;background:var(--b1)}
+.b2{width:38vmax;height:38vmax;right:-10vmax;top:10vh;background:var(--b2)}
+.b3{width:34vmax;height:34vmax;left:20vw;bottom:-16vmax;background:var(--b3)}
+.b4{width:24vmax;height:24vmax;right:12vw;bottom:-6vmax;background:var(--b4)}
+main{position:relative;height:100%;display:grid;place-items:center;padding:24px}
+.panel{
+  width:min(460px,100%);padding:44px 28px 28px;text-align:center;border-radius:44px;
+  background:var(--glass);
+  -webkit-backdrop-filter:blur(34px) saturate(180%);backdrop-filter:blur(34px) saturate(180%);
+  box-shadow:inset 0 1.5px 0 var(--glass-edge),inset 0 -1px 0 rgba(255,255,255,.12),inset 1px 0 0 rgba(255,255,255,.25),0 30px 60px -20px var(--glass-shade);
+  animation:rise .9s cubic-bezier(.2,.9,.25,1) both;
+}
+@keyframes rise{from{opacity:0;transform:translateY(24px) scale(.96)}to{opacity:1;transform:none}}
+.digits{display:flex;justify-content:center;align-items:center;gap:6px;font-size:clamp(88px,26vw,132px);font-weight:800;letter-spacing:-.05em;line-height:1;margin-bottom:26px}
+.lens{
+  width:.78em;height:.78em;border-radius:50%;position:relative;margin:0 2px;
+  background:radial-gradient(circle at 30% 24%,rgba(255,255,255,.75),rgba(255,255,255,0) 38%),var(--glass);
+  -webkit-backdrop-filter:blur(8px) saturate(240%) brightness(1.15);backdrop-filter:blur(8px) saturate(240%) brightness(1.15);
+  box-shadow:inset 0 3px 6px var(--glass-edge),inset 0 -10px 18px rgba(255,255,255,.18),inset 0 0 0 1.5px rgba(255,255,255,.35),0 18px 30px -10px var(--glass-shade);
+  transition:transform .5s cubic-bezier(.2,.8,.2,1);
+}
+.lens::after{content:"";position:absolute;inset:18% 22% auto auto;width:18%;height:10%;border-radius:50%;background:rgba(255,255,255,.7);filter:blur(2px);transform:rotate(-30deg)}
+.pill{display:inline-flex;align-items:center;gap:8px;max-width:100%;margin-bottom:16px;padding:8px 14px;border-radius:999px;font-size:13px;font-weight:500;color:var(--sub);background:var(--glass);box-shadow:inset 0 1px 0 var(--glass-edge)}
+.pill i{flex:none;width:8px;height:8px;border-radius:50%;background:#ff9f0a;box-shadow:0 0 0 3px rgba(255,159,10,.25)}
+.pill span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+h1{margin:0 0 10px;font-size:24px;font-weight:700;letter-spacing:-.02em}
+p{margin:0 auto 30px;max-width:30ch;font-size:16px;line-height:1.55;color:var(--sub);word-break:keep-all}
+.actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.btn{
+  appearance:none;border:0;cursor:pointer;text-decoration:none;font:inherit;font-size:16px;font-weight:600;
+  padding:15px 26px;border-radius:999px;color:var(--text);min-height:50px;
+  background:var(--glass);-webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%);
+  box-shadow:inset 0 1px 0 var(--glass-edge),0 8px 18px -8px var(--glass-shade);
+  transition:transform .25s cubic-bezier(.3,1.6,.5,1),box-shadow .25s;
+}
+.btn.primary{background:var(--accent);color:var(--accent-text);box-shadow:inset 0 1.5px 0 rgba(255,255,255,.45),0 10px 22px -8px var(--accent)}
+.btn:hover{transform:scale(1.04)}
+.btn:active{transform:scale(.95)}
+.btn:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="blob b1"></div><div class="blob b2"></div><div class="blob b3"></div><div class="blob b4"></div>
+<main>
+  <section class="panel" role="alert">
+    <div class="digits" aria-label="404"><span>4</span><span class="lens" id="lens"></span><span>4</span></div>
+    <div class="pill"><i></i><span id="addr">연결된 사이트 없음</span></div>
+    <h1>연결된 사이트를 찾을 수 없어요</h1>
+    <p>이 주소로 호스팅 중인 사이트가 없거나 호스팅이 종료됐어요. 주소를 다시 확인하거나 호스팅 홈으로 이동해 주세요.</p>
+    <div class="actions">
+      <a class="btn primary" href="https://host.doyungo.com">호스팅 홈으로 이동</a>
+      <button class="btn" type="button" onclick="history.length>1?history.back():location.assign('https://host.doyungo.com')">이전 페이지</button>
+    </div>
+  </section>
+</main>
+<script>
+(function(){
+  var blobs=[].slice.call(document.querySelectorAll('.blob')),lens=document.getElementById('lens');
+  var k=[28,-36,22,-18];
+  try{var h=location.host+location.pathname;if(h&&h!=='/')document.getElementById('addr').textContent=h.replace(/\/$/,'')+' · 연결된 사이트 없음';}catch(e){}
+  function move(x,y){
+    var nx=x/innerWidth-.5,ny=y/innerHeight-.5;
+    blobs.forEach(function(b,i){b.style.transform='translate('+nx*k[i]*3+'px,'+ny*k[i]*3+'px)'});
+    lens.style.transform='translate('+nx*14+'px,'+ny*14+'px)';
+  }
+  addEventListener('pointermove',function(e){move(e.clientX,e.clientY)});
+})();
+</script>
+</body>
+</html>
