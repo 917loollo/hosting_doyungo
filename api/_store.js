@@ -52,3 +52,28 @@ export async function claimSlug(slug, uid) {
 }
 
 export const sitePath = (uid, slug) => `sites/${uid}/${slug}.html`;
+
+export async function listAll(prefix) {
+  const blobs = [];
+  let cursor;
+  do {
+    const out = await B.list({ prefix, cursor, limit: 1000, token: token() });
+    blobs.push(...out.blobs);
+    cursor = out.hasMore ? out.cursor : undefined;
+  } while (cursor);
+  return blobs;
+}
+
+export const legacyPath = slug => `sites/${slug}.html`;
+
+export const projectPrefix = (uid, slug) => `sites/${uid}/${slug}/`;
+export function safeFilePath(input) {
+  if (typeof input !== 'string') return null;
+  const p = input.replace(/\\/g, '/').replace(/^\/+/, '');
+  if (!p || p.length > 240 || p.split('/').some(x => !x || x === '.' || x === '..') || /^[a-z]+:/i.test(p) || p.includes('\0')) return null;
+  return p;
+}
+export function contentTypeFor(path) {
+  const ext = path.split('.').pop().toLowerCase();
+  return ({ html:'text/html; charset=utf-8', htm:'text/html; charset=utf-8', css:'text/css; charset=utf-8', js:'text/javascript; charset=utf-8', mjs:'text/javascript; charset=utf-8', json:'application/json; charset=utf-8', svg:'image/svg+xml', png:'image/png', jpg:'image/jpeg', jpeg:'image/jpeg', gif:'image/gif', webp:'image/webp', ico:'image/x-icon', txt:'text/plain; charset=utf-8', xml:'application/xml; charset=utf-8', woff:'font/woff', woff2:'font/woff2', ttf:'font/ttf', otf:'font/otf', mp4:'video/mp4', mp3:'audio/mpeg', pdf:'application/pdf' })[ext] || 'application/octet-stream';
+}
