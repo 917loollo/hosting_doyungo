@@ -1,5 +1,16 @@
 {
   "rewrites": [
-    { "source": "/:slug", "destination": "/api/site?slug=:slug" }
+    {
+      "source": "/",
+      "destination": "/host.html"
+    },
+    {
+      "source": "/:slug/:path*",
+      "destination": "/api/site?slug=:slug&path=:path*"
+    },
+    {
+      "source": "/:slug",
+      "destination": "/api/site?slug=:slug"
+    }
   ]
 }
