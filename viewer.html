@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HTML Code Viewer</title>
+<style>
+:root{color-scheme:light;--bg:#f3f5fa;--ink:#182033;--muted:#778097;--line:#e4e8f0;--accent:#3978f6}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;padding:28px 16px 48px;background:radial-gradient(circle at 15% 0%,#e6edff 0,transparent 36%),var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.app{width:min(100%,1000px);margin:auto}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:8px 2px 24px}
+.brand{display:flex;align-items:center;gap:11px;font-weight:750;font-size:21px;letter-spacing:-.5px}
+.logo{width:42px;height:42px;border-radius:14px;background:linear-gradient(145deg,#5993ff,#285bdc);display:grid;place-items:center;color:white;font-size:20px;box-shadow:0 7px 18px #3978f633}
+.tag{font-size:12px;color:var(--muted);background:#ffffffa8;border:1px solid #fff;padding:7px 11px;border-radius:99px}
+.panel{background:#ffffffd9;border:1px solid #ffffff;box-shadow:0 18px 55px #26365b12;border-radius:24px;padding:22px;backdrop-filter:blur(18px);margin-bottom:16px}
+h1{font-size:clamp(24px,5vw,34px);letter-spacing:-1.1px;margin:0 0 8px}
+.desc{color:var(--muted);font-size:14px;line-height:1.6;margin:0 0 20px}
+.drop{border:1.7px dashed #b8c8e9;background:#f7f9ff;border-radius:18px;padding:28px 16px;text-align:center;transition:.2s}
+.drop.drag{border-color:var(--accent);background:#edf3ff;transform:scale(1.005)}
+.upload-icon{font-size:30px;margin-bottom:8px}
+.drop strong{display:block;font-size:16px;margin-bottom:6px}
+.drop small{color:var(--muted);font-size:13px}
+.actions{display:flex;flex-wrap:wrap;justify-content:center;gap:9px;margin-top:16px}
+button,.file-label{border:0;border-radius:12px;padding:11px 16px;font-size:14px;font-weight:650;cursor:pointer;transition:.15s}
+button:hover,.file-label:hover{transform:translateY(-1px);filter:brightness(.98)}
+.primary{background:var(--accent);color:white;box-shadow:0 5px 13px #3978f633}
+.secondary,.file-label{background:#edf1f8;color:#34415c}
+button:disabled{opacity:.4;cursor:not-allowed;transform:none}
+#fileInput{display:none}
+.toolbar{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+.file-info{min-width:0}
+.file-name{font-weight:700;font-size:15px;overflow-wrap:anywhere}
+.file-size{font-size:12px;color:var(--muted);margin-top:4px}
+.tool-buttons{display:flex;gap:7px;flex-wrap:wrap}
+.tool-buttons button{padding:9px 12px;font-size:12px}
+.code-wrap{position:relative;border-radius:16px;overflow:hidden;background:#111827;border:1px solid #263247}
+.code-head{height:42px;display:flex;align-items:center;gap:6px;padding:0 14px;background:#1b2638;border-bottom:1px solid #ffffff12}
+.dot{width:9px;height:9px;border-radius:50%;background:#fa6b68}.dot:nth-child(2){background:#f5bd4f}.dot:nth-child(3){background:#55c78a}
+.code-label{margin-left:8px;color:#aab7ca;font-size:11px}
+.code-area{display:flex;max-height:65vh;min-height:260px;overflow:auto}
+.lines{padding:16px 12px 16px 16px;text-align:right;color:#65738a;font:13px/1.65 ui-monospace,SFMono-Regular,Menlo,monospace;user-select:none;border-right:1px solid #ffffff12;white-space:pre}
+#code{display:block;flex:1;min-width:0;margin:0;padding:16px;color:#dce7f7;background:transparent;border:0;outline:0;resize:none;white-space:pre;overflow:visible;font:13px/1.65 ui-monospace,SFMono-Regular,Menlo,monospace;tab-size:2}
+.empty{color:#8b96a9;text-align:center;padding:64px 16px;font-size:14px}
+.status{font-size:12px;color:var(--muted);margin-top:12px;min-height:18px}
+footer{text-align:center;color:#9aa3b3;font-size:11px;margin-top:22px}
+@media(max-width:600px){body{padding:16px 11px 32px}.panel{padding:16px;border-radius:20px}.tag{display:none}.code-area{max-height:62vh}.drop{padding:24px 12px}}
+</style>
+</head>
+<body>
+<main class="app">
+<header><div class="brand"><div class="logo">&lt;/&gt;</div> HTML Code Viewer</div><div class="tag">간편한 HTML 소스 보기</div></header>
+<section class="panel">
+  <h1>HTML 코드를 확인하세요</h1>
+  <p class="desc">HTML 파일을 선택하거나 이곳에 끌어다 놓으면 파일 안의 코드를 바로 보여줍니다.</p>
+  <div class="drop" id="drop">
+    <div class="upload-icon">📄</div>
+    <strong>HTML 파일을 여기에 놓으세요</strong>
+    <small>.html 또는 .htm 파일 지원</small>
+    <div class="actions">
+      <label class="file-label" for="fileInput">파일 선택하기</label>
+      <button class="secondary" id="pasteBtn">코드 직접 붙여넣기</button>
+    </div>
+    <input id="fileInput" type="file" accept=".html,.htm,text/html">
+  </div>
+  <div class="status" id="status" aria-live="polite">파일은 이 브라우저 안에서만 열리며 서버로 전송되지 않습니다.</div>
+</section>
+<section class="panel">
+  <div class="toolbar">
+    <div class="file-info"><div class="file-name" id="fileName">선택된 파일 없음</div><div class="file-size" id="fileSize">HTML 파일을 불러오면 코드가 표시됩니다.</div></div>
+    <div class="tool-buttons">
+      <button class="secondary" id="copyBtn" disabled>복사</button>
+      <button class="secondary" id="downloadBtn" disabled>저장</button>
+      <button class="secondary" id="clearBtn" disabled>초기화</button>
+    </div>
+  </div>
+  <div class="code-wrap">
+    <div class="code-head"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="code-label">SOURCE CODE</span></div>
+    <div class="code-area" id="codeArea">
+      <div class="empty" id="empty">아직 불러온 코드가 없습니다.</div>
+      <div class="lines" id="lines" hidden>1</div>
+      <textarea id="code" spellcheck="false" readonly aria-label="HTML 소스 코드" hidden></textarea>
+    </div>
+  </div>
+</section>
+<footer>HTML Code Viewer · 파일 내용은 기기 안에서 처리됩니다.</footer>
+</main>
+<script>
+const input=document.getElementById('fileInput'),drop=document.getElementById('drop'),code=document.getElementById('code');
+const lines=document.getElementById('lines'),empty=document.getElementById('empty'),status=document.getElementById('status');
+let currentName='source.html';
+function showCode(text,name='pasted-code.html'){
+  code.value=text;currentName=name;
+  document.getElementById('fileName').textContent=name;
+  const bytes=new Blob([text]).size;
+  document.getElementById('fileSize').textContent=`${text.length.toLocaleString()}자 · ${(bytes/1024).toFixed(1)} KB`;
+  empty.hidden=true;code.hidden=false;lines.hidden=false;
+  ['copyBtn','downloadBtn','clearBtn'].forEach(id=>document.getElementById(id).disabled=false);
+  updateLines();status.textContent='코드를 불러왔습니다.';
+}
+function updateLines(){const count=Math.max(1,code.value.split('\n').length);lines.textContent=Array.from({length:count},(_,i)=>i+1).join('\n');}
+function readFile(file){
+  if(!file)return;
+  if(!/\.(html?|HTML?)$/.test(file.name)&&file.type!=='text/html'){status.textContent='HTML 또는 HTM 파일을 선택해 주세요.';return;}
+  const reader=new FileReader();
+  reader.onload=()=>showCode(String(reader.result??''),file.name);
+  reader.onerror=()=>status.textContent='파일을 읽지 못했습니다. 다시 시도해 주세요.';
+  reader.readAsText(file);
+}
+input.addEventListener('change',e=>readFile(e.target.files[0]));
+['dragenter','dragover'].forEach(type=>drop.addEventListener(type,e=>{e.preventDefault();drop.classList.add('drag');}));
+['dragleave','drop'].forEach(type=>drop.addEventListener(type,e=>{e.preventDefault();drop.classList.remove('drag');}));
+drop.addEventListener('drop',e=>readFile(e.dataTransfer.files[0]));
+document.getElementById('copyBtn').addEventListener('click',async()=>{
+  try{await navigator.clipboard.writeText(code.value);status.textContent='코드를 클립보드에 복사했습니다.';}
+  catch{code.focus();code.select();status.textContent='코드를 선택했습니다. 길게 눌러 복사해 주세요.';}
+});
+document.getElementById('downloadBtn').addEventListener('click',()=>{
+  const blob=new Blob([code.value],{type:'text/html;charset=utf-8'}),url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=currentName;a.click();URL.revokeObjectURL(url);
+});
+document.getElementById('clearBtn').addEventListener('click',()=>{
+  code.value='';input.value='';currentName='source.html';
+  document.getElementById('fileName').textContent='선택된 파일 없음';
+  document.getElementById('fileSize').textContent='HTML 파일을 불러오면 코드가 표시됩니다.';
+  code.hidden=true;lines.hidden=true;empty.hidden=false;empty.textContent='아직 불러온 코드가 없습니다.';
+  ['copyBtn','downloadBtn','clearBtn'].forEach(id=>document.getElementById(id).disabled=true);
+  status.textContent='초기화했습니다.';
+});
+document.getElementById('pasteBtn').addEventListener('click',()=>{
+  const value=prompt('HTML 코드를 여기에 붙여넣으세요.');
+  if(value!==null)showCode(value);
+});
+</script>
+</body>
+</html>
