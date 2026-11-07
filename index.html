@@ -4,18 +4,139 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 <title>doyungo.com | Host Console</title>
-<link rel="stylesheet" href="style.css">
+<style>
+:root{
+  --bg:#f7f7fb; --surface:#ffffff; --text:#14142b; --muted:#6b6b85;
+  --border:#e6e6f0; --accent:#6c5ce7; --accent2:#a29bfe; --accent-soft:#efedff;
+  --shadow:0 10px 30px rgba(40,30,120,.08);
+}
+@media (prefers-color-scheme: dark){
+  :root{
+    --bg:#0e0e18; --surface:#171726; --text:#f1f1f9; --muted:#9a9ab5;
+    --border:#26263a; --accent:#8b7dff; --accent2:#5b4de0; --accent-soft:#232043;
+    --shadow:0 10px 30px rgba(0,0,0,.4);
+  }
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Pretendard","Noto Sans KR","Segoe UI",sans-serif;
+  background:var(--bg); color:var(--text); line-height:1.6;
+  background-image:radial-gradient(60rem 30rem at 50% -10%, var(--accent-soft), transparent 70%);
+  background-repeat:no-repeat;
+}
+a{color:inherit;text-decoration:none}
+
+/* Header */
+header{
+  position:sticky;top:0;z-index:50;
+  background:color-mix(in srgb,var(--bg) 80%,transparent);
+  backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
+  border-bottom:1px solid var(--border);
+}
+.nav-container{
+  max-width:1100px;margin:0 auto;padding:14px 20px;
+  display:flex;align-items:center;gap:20px;position:relative;
+}
+.logo{font-weight:800;font-size:1.25rem;letter-spacing:-.02em}
+.logo span{color:var(--accent)}
+.nav-links{display:flex;gap:6px;margin-left:auto}
+.nav-links a{
+  padding:8px 14px;border-radius:999px;font-size:.95rem;font-weight:500;color:var(--muted);
+  transition:background .2s,color .2s;
+}
+.nav-links a:hover{background:var(--accent-soft);color:var(--accent)}
+.status-pill{
+  font-size:.78rem;font-weight:600;padding:6px 12px;border-radius:999px;
+  background:var(--accent-soft);color:var(--accent);white-space:nowrap;
+  display:inline-flex;align-items:center;gap:6px;
+}
+.status-pill::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor;opacity:.8}
+
+/* Hamburger */
+.menu-btn{
+  display:none;width:42px;height:42px;border:1px solid var(--border);border-radius:12px;
+  background:var(--surface);cursor:pointer;margin-left:auto;
+  flex-direction:column;align-items:center;justify-content:center;gap:5px;
+}
+.menu-btn span{display:block;width:18px;height:2px;border-radius:2px;background:var(--text);transition:transform .25s,opacity .2s}
+.menu-btn[aria-expanded="true"] span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.menu-btn[aria-expanded="true"] span:nth-child(2){opacity:0}
+.menu-btn[aria-expanded="true"] span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+
+/* Hero */
+main{max-width:1100px;margin:0 auto;padding:0 20px}
+.hero-section{text-align:center;padding:90px 0 70px}
+.badge{
+  display:inline-block;padding:6px 14px;border-radius:999px;font-size:.8rem;font-weight:600;
+  background:var(--accent-soft);color:var(--accent);margin-bottom:22px;
+}
+.hero-section h1{font-size:clamp(2.1rem,6vw,3.8rem);line-height:1.2;letter-spacing:-.03em;font-weight:800}
+.hero-section h1 span{
+  background:linear-gradient(90deg,var(--accent),var(--accent2));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.hero-section p{max-width:520px;margin:20px auto 32px;color:var(--muted);font-size:1.05rem}
+.btn-primary{
+  display:inline-block;padding:14px 32px;border-radius:14px;font-weight:700;color:#fff;
+  background:linear-gradient(135deg,var(--accent),var(--accent2));
+  box-shadow:0 8px 24px color-mix(in srgb,var(--accent) 40%,transparent);
+  transition:transform .2s,box-shadow .2s;
+}
+.btn-primary:hover{transform:translateY(-2px)}
+
+/* Cards */
+.features-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:20px;padding-bottom:70px}
+.feature-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:20px;
+  padding:28px;box-shadow:var(--shadow);transition:transform .25s,border-color .25s;
+}
+.feature-card:hover{transform:translateY(-4px);border-color:var(--accent2)}
+.feature-card.lavender{background:var(--accent-soft)}
+.card-icon{
+  display:grid;place-items:center;width:48px;height:48px;border-radius:14px;
+  background:var(--accent-soft);font-size:1.4rem;margin-bottom:16px;color:var(--accent);
+}
+.feature-card.lavender .card-icon{background:var(--surface)}
+.feature-card h3{font-size:1.15rem;margin-bottom:6px}
+.feature-card p{color:var(--muted);font-size:.95rem}
+
+footer{text-align:center;padding:30px 20px;border-top:1px solid var(--border);color:var(--muted);font-size:.85rem}
+
+/* Mobile */
+@media (max-width:760px){
+  .menu-btn{display:flex}
+  .status-pill{display:none}
+  .nav-links{
+    position:absolute;top:100%;left:12px;right:12px;margin:8px 0 0;
+    flex-direction:column;gap:2px;padding:10px;
+    background:var(--surface);border:1px solid var(--border);border-radius:16px;box-shadow:var(--shadow);
+    opacity:0;visibility:hidden;transform:translateY(-8px);
+    transition:opacity .2s,transform .2s,visibility .2s;
+  }
+  .nav-links.open{opacity:1;visibility:visible;transform:none}
+  .nav-links a{padding:13px 14px;border-radius:10px;color:var(--text)}
+  .nav-links .nav-status{display:block}
+  .features-grid{grid-template-columns:1fr}
+  .hero-section{padding:60px 0 50px}
+}
+.nav-links .nav-status{display:none;padding:10px 14px 6px}
+</style>
 </head>
 <body>
 <header>
   <div class="nav-container">
     <a href="/" class="logo">doyungo<span>.com</span></a>
-    <nav class="nav-links">
-      <a href="code.html">Codeing</a>
+    <nav class="nav-links" id="navLinks">
+      <a href="code.html">Coding</a>
       <a href="symbols.html">Symbols</a>
       <a href="host.html">Hosting</a>
+      <div class="nav-status"><span id="status-mobile" class="status-pill">연결 확인 중</span></div>
     </nav>
     <span id="status" class="status-pill">연결 확인 중</span>
+    <button class="menu-btn" id="menuBtn" aria-label="메뉴 열기" aria-expanded="false" aria-controls="navLinks">
+      <span></span><span></span><span></span>
+    </button>
   </div>
 </header>
 
@@ -23,7 +144,7 @@
   <section class="hero-section" id="console">
     <div class="badge">Developer Tools</div>
     <h1>코딩을 하고,<br><span>바로 웹에 공개하세요.</span></h1>
-    <p>doyungo.com의 개발자 콘솔 입니다. HTML을 저장하면 원하는 이름의 공개 주소가 만들어집니다.</p>
+    <p>doyungo.com의 개발자 콘솔입니다. HTML을 저장하면 원하는 이름의 공개 주소가 만들어집니다.</p>
     <a href="start.html" class="btn-primary">시작하기</a>
   </section>
 
@@ -44,7 +165,30 @@
       <p>doyungo.com 호스팅으로 쉽고 빠르게 호스팅 할 수 있습니다.</p>
     </article>
   </section>
+</main>
+
 <footer><p>© 2026 doyungo.com</p></footer>
+
+<script>
+(function(){
+  var btn=document.getElementById('menuBtn'), nav=document.getElementById('navLinks');
+  function setOpen(o){
+    nav.classList.toggle('open',o);
+    btn.setAttribute('aria-expanded',o);
+    btn.setAttribute('aria-label',o?'메뉴 닫기':'메뉴 열기');
+  }
+  btn.addEventListener('click',function(e){e.stopPropagation();setOpen(!nav.classList.contains('open'))});
+  nav.addEventListener('click',function(e){if(e.target.tagName==='A')setOpen(false)});
+  document.addEventListener('click',function(e){if(!nav.contains(e.target))setOpen(false)});
+  window.addEventListener('resize',function(){if(window.innerWidth>760)setOpen(false)});
+
+  // 모바일 메뉴 안의 상태 표시를 기존 #status와 동기화
+  var s=document.getElementById('status'), m=document.getElementById('status-mobile');
+  function sync(){m.textContent=s.textContent;m.className=s.className}
+  new MutationObserver(sync).observe(s,{childList:true,characterData:true,subtree:true,attributes:true});
+  sync();
+})();
+</script>
 <script src="script.js"></script>
 </body>
 </html>
