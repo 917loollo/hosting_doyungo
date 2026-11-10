@@ -83,3 +83,4 @@ input{margin-top:10px}label{display:block;font-size:13px;font-weight:600;margin:
   .code textarea{min-height:420px}.actions{position:static;margin-top:16px}.pane-preview iframe{height:520px}
   .toast{bottom:24px}.site-actions .primary{flex:1 1 auto}.upload{flex-direction:row;align-items:center;justify-content:space-between}
 }
+.pages{display:flex;flex-wrap:wrap;gap:6px}.pages:empty{display:none}.pages a{padding:3px 10px;border-radius:99px;background:var(--line);color:var(--ink);font:500 12px var(--mono);text-decoration:none}

@@ -49,7 +49,7 @@ async function api(url, opt = {}) {
   const headers = { ...(idToken ? { Authorization: 'Bearer ' + idToken } : {}), ...(opt.body ? { 'Content-Type': 'application/json' } : {}), ...(opt.headers || {}) };
   const r = await fetch(url, { credentials: 'same-origin', ...opt, headers });
   let d = {}; try { d = await r.json(); } catch {}
-  if (!r.ok) throw new Error(d.error || '요청에 실패했습니다.');
+  if (!r.ok) throw new Error(d.error || `요청에 실패했습니다. (HTTP ${r.status}${r.status === 404 ? ' · 서버 API가 최신 버전으로 배포됐는지 확인하세요' : ''})`);
   return d;
 }
 
@@ -382,28 +382,29 @@ async function loadSites() {
     const d = await api('/api/sites');
     box.innerHTML = '';
     if (d.admin) statusEl.textContent = '● 관리자' + (auth.currentUser?.email ? ' · ' + auth.currentUser.email : '');
+    $('#siteCount').textContent = d.sites.length ? d.sites.length + '개' : '';
     if (!d.sites.length) { box.innerHTML = '<div class="empty">아직 공개한 사이트가 없어요.<br>‘＋ 새 사이트’로 첫 사이트를 만들어 보세요.</div>'; return; }
     d.sites.forEach(s => {
       const el = document.createElement('div'); el.className = 'site' + (editing?.slug === s.slug ? ' editing' : '') + (s.invalid ? ' bad' : ''); el.dataset.slug = s.slug;
-      el.innerHTML = `<div><div class="site-name">${esc(s.slug)}${s.invalid ? ' <span class="tag warn">이름 확인 필요</span>' : ''}${editing?.slug === s.slug ? ' <span class="tag live">편집 중</span>' : ''}${s.owner && !s.mine ? ` <span class="tag">${s.owner === 'legacy' ? '구버전' : '다른 사용자 ' + esc(s.owner.slice(0, 6))}</span>` : ''}</div><a class="site-url" href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.url)}</a><div class="site-meta">${s.files ? s.files + '개 파일 · ' : ''}${s.updatedAt ? new Date(s.updatedAt).toLocaleString('ko-KR') : ''}</div></div><div class="site-actions"><button class="primary" data-edit="${esc(s.slug)}"${s.invalid ? ' disabled title="영문 소문자·숫자·하이픈 이름만 편집할 수 있어요"' : ''}>편집</button><button class="secondary" data-copy="${esc(s.url)}">URL 복사</button><button class="secondary" data-del="${esc(s.slug)}">삭제</button></div>`;
+      el.innerHTML = `<div><div class="site-name">${esc(s.slug)}${s.invalid ? ' <span class="tag warn">이름 확인 필요</span>' : ''}${editing?.slug === s.slug ? ' <span class="tag live">편집 중</span>' : ''}${s.owner && !s.mine ? ` <span class="tag">${s.owner === 'legacy' ? '구버전' : '다른 사용자 ' + esc(s.owner.slice(0, 6))}</span>` : ''}</div><a class="site-url" href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.url)}</a><div class="pages">${(s.pages || []).length > 1 ? s.pages.map(p => `<a href="${esc(s.url + (p === 'index.html' ? '' : '/' + p.replace(/\.html?$/i, '')))}" target="_blank" rel="noopener">${esc(p.replace(/\.html?$/i, ''))}</a>`).join('') : ''}</div><div class="site-meta">${s.files ? s.files + '개 파일 · ' : ''}${s.updatedAt ? new Date(s.updatedAt).toLocaleString('ko-KR') : ''}</div></div><div class="site-actions"><button class="primary" data-edit="${esc(s.slug)}"${s.invalid ? ' disabled title="영문 소문자·숫자·하이픈 이름만 편집할 수 있어요"' : ''}>편집</button><button class="secondary" data-copy="${esc(s.url)}">URL 복사</button><button class="secondary" data-del="${esc(s.slug)}" data-owner="${d.admin ? esc(s.owner || '') : ''}">삭제</button></div>`;
       box.appendChild(el);
     });
     box.querySelectorAll('[data-edit]').forEach(b => b.onclick = () => loadSite(b.dataset.edit, b));
     box.querySelectorAll('[data-copy]').forEach(b => b.onclick = async () => { try { await navigator.clipboard.writeText(b.dataset.copy); b.textContent = '복사됨 ✓'; setTimeout(() => b.textContent = 'URL 복사', 1200); } catch { prompt('URL을 복사하세요', b.dataset.copy); } });
-    box.querySelectorAll('[data-del]').forEach(b => b.onclick = () => deleteSite(b.dataset.del));
+    box.querySelectorAll('[data-del]').forEach(b => b.onclick = () => deleteSite(b.dataset.del, b.dataset.owner));
   } catch (e) { box.innerHTML = '<div class="empty">사이트 목록을 불러오지 못했습니다: ' + esc(e.message) + '</div>'; }
 }
 async function loadSite(slug, btn) {
   if (editing?.slug !== slug && !confirmDiscard()) return;
   const run = async () => {
-    const d = await api('/api/sites/' + encodeURIComponent(slug));
+    const d = await api('/api/sites?slug=' + encodeURIComponent(slug));
     const metas = Array.isArray(d.files) ? d.files : [];
     const files = [];
     if (!d.legacy && metas.length) {
       // 파일을 6개씩 병렬로 불러오기
       for (let i = 0; i < metas.length; i += 6) {
         const part = await Promise.all(metas.slice(i, i + 6).map(async m => {
-          try { const it = await api('/api/sites/' + encodeURIComponent(slug) + '?file=' + encodeURIComponent(m.path)); return { path: m.path, base64: it.content, binary: !textExt.test(m.path) }; }
+          try { const it = await api('/api/sites?slug=' + encodeURIComponent(slug) + '&file=' + encodeURIComponent(m.path)); return { path: m.path, base64: it.content, binary: !textExt.test(m.path) }; }
           catch (err) { if (m.path === 'index.html' && d.html) return { path: 'index.html', base64: toBase64(enc(d.html)), text: d.html, binary: false }; throw new Error(`${m.path} 불러오기 실패: ${err.message}`); }
         }));
         files.push(...part);
@@ -420,10 +421,10 @@ async function loadSite(slug, btn) {
   };
   try { btn ? await busy(btn, '불러오는 중…', run) : await run(); } catch (e) { toast(e.message, 'err'); }
 }
-async function deleteSite(slug) {
+async function deleteSite(slug, owner) {
   if (!confirm(`/${slug} 사이트를 삭제할까요? 되돌릴 수 없습니다.`)) return;
   try {
-    await api('/api/sites/' + encodeURIComponent(slug), { method: 'DELETE' });
+    await api('/api/sites?slug=' + encodeURIComponent(slug) + (owner ? '&owner=' + encodeURIComponent(owner) : ''), { method: 'DELETE' });
     toast(`/${slug} 삭제됨`);
     if (editing?.slug === slug) resetEditor(true);
     await loadSites();
