@@ -4,38 +4,85 @@ import { B, token, valid, titleFromHtml, claimSlug, ownerOf, readBlob, listAll, 
 const baseUrl = req => process.env.PUBLIC_BASE_URL || `${req.headers['x-forwarded-proto'] || 'https'}://${req.headers.host}`;
 const MAX_PROJECT_BYTES = 3 * 1024 * 1024;
 
+// 사이트 하나 조회/삭제 — /api/sites?slug=이름 (동적 경로 대신 쿼리스트링을 써서 라우팅 충돌 방지)
+async function siteHandler(req, res, user, slug) {
+  if (req.method === 'DELETE') {
+    const seg = String(slug);
+    if (!seg || /[\/\\]/.test(seg) || seg.includes('..')) return res.status(400).json({ error: '잘못된 사이트 이름입니다.' });
+    const qOwner = typeof req.query?.owner === 'string' ? req.query.owner : '';
+    const record = valid(seg) ? await ownerOf(seg) : null;
+    let ownerUid = user.uid;
+    if (user.isAdmin) ownerUid = qOwner && qOwner !== 'legacy' ? qOwner : (qOwner === 'legacy' ? null : record);
+    else if (record && record !== user.uid) return res.status(404).json({ error: '사이트를 찾을 수 없습니다.' });
+    const targets = [];
+    if (ownerUid) {
+      targets.push(...(await listAll(`sites/${ownerUid}/${seg}/`)).map(x => x.pathname));
+      if (await readBlob(sitePath(ownerUid, seg))) targets.push(sitePath(ownerUid, seg));
+    } else if (user.isAdmin && await readBlob(legacyPath(seg))) targets.push(legacyPath(seg));
+    if (record && (record === ownerUid || user.isAdmin)) targets.push(`slugs/${seg}.json`);
+    if (!targets.length) return res.status(404).json({ error: '삭제할 사이트를 찾을 수 없습니다.' });
+    await B.del(targets, { token: token() });
+    return res.status(200).json({ ok: true, deleted: targets.length });
+  }
+  if (req.method !== 'GET') return res.status(405).json({ error: 'Method Not Allowed' });
+  if (!valid(slug)) return res.status(400).json({ error: `'${slug}' 은(는) 편집할 수 없는 이름입니다. (영문 소문자·숫자·하이픈만 가능)` });
+  const owner = await ownerOrAdopt(slug, user.uid);
+  if (!(owner === user.uid || user.isAdmin)) return res.status(404).json({ error: '사이트를 찾을 수 없습니다.' });
+  const prefix = owner ? projectPrefix(owner, slug) : null;
+  const isLegacy = !owner || !(await readBlob(prefix + 'index.html'));
+  const requested = req.query?.file;
+  if (requested) {
+    const fp = safeFilePath(requested);
+    const file = fp && !isLegacy ? await readBlob(prefix + fp) : null;
+    if (!file) return res.status(404).json({ error: '파일을 찾을 수 없습니다.' });
+    return res.status(200).json({ path: fp, content: file.buf.toString('base64'), contentType: file.contentType || contentTypeFor(fp) });
+  }
+  if (isLegacy) {
+    const r = await readBlob(owner ? sitePath(owner, slug) : legacyPath(slug));
+    if (!r) return res.status(404).json({ error: '사이트를 찾을 수 없습니다.' });
+    const html = r.buf.toString('utf8');
+    return res.status(200).json({ slug, html, title: titleFromHtml(html), files: [{ path: 'index.html', size: r.buf.length }], legacy: true });
+  }
+  const blobs = await listAll(prefix);
+  const files = blobs.map(x => ({ path: x.pathname.slice(prefix.length), size: x.size || 0, updatedAt: x.uploadedAt }));
+  const html = (await readBlob(prefix + 'index.html'))?.buf.toString('utf8') || '';
+  return res.status(200).json({ slug, html, title: titleFromHtml(html), files, legacy: false });
+}
+
 export default async function handler(req, res) {
   const user = await getUser(req);
   if (!user) return unauthorized(res);
   try {
     const prefix = `sites/${user.uid}/`;
+    if (req.query?.slug !== undefined && req.method !== 'POST') return await siteHandler(req, res, user, String(req.query.slug));
     if (req.method === 'GET') {
       const group = (blobs, keyOf) => {
         const m = new Map();
         for (const b of blobs) {
           const k = keyOf(b); if (!k) continue;
-          const g = m.get(k.id) || { ...k, files: 0, updatedAt: null };
-          g.files++; if (!g.updatedAt || new Date(b.uploadedAt) > new Date(g.updatedAt)) g.updatedAt = b.uploadedAt;
+          const g = m.get(k.id) || { ...k, files: 0, updatedAt: null, pages: [] };
+          g.files++; if (/\.html?$/i.test(b.pathname) && g.pages.length < 30) g.pages.push(k.page); if (!g.updatedAt || new Date(b.uploadedAt) > new Date(g.updatedAt)) g.updatedAt = b.uploadedAt;
           m.set(k.id, g);
         }
         return [...m.values()];
       };
-      const toSite = g => ({ slug: g.slug, owner: g.owner, mine: g.owner === user.uid, files: g.files, invalid: !valid(g.slug), url: `${baseUrl(req)}/${g.slug}`, updatedAt: g.updatedAt });
+      const toSite = g => ({ slug: g.slug, owner: g.owner, mine: g.owner === user.uid, files: g.files, pages: g.pages.sort(), invalid: !valid(g.slug), url: `${baseUrl(req)}/${g.slug}`, updatedAt: g.updatedAt });
       if (user.isAdmin) {
         const blobs = await listAll('sites/');
         const sites = group(blobs, b => {
           const parts = b.pathname.slice(6).split('/');
-          const isOwned = parts.length > 1 && looksUid(parts[0]);
+          const isOwned = parts.length > 1 && (looksUid(parts[0]) || !valid(parts[0]));
           const owner = isOwned ? parts[0] : 'legacy', seg = isOwned ? parts[1] : parts[0];
           const slug = seg.replace(/\.html$/, ''); if (!slug) return null;
-          return { id: owner + '/' + slug, slug, owner };
+          return { id: owner + '/' + slug, slug, owner, page: isOwned ? (parts.slice(2).join('/') || 'index.html') : (parts.length > 1 ? parts.slice(1).join('/') : 'index.html') };
         }).map(toSite);
         return res.status(200).json({ sites, admin: true });
       }
       const blobs = await listAll(prefix);
       const sites = group(blobs, b => {
         const slug = b.pathname.slice(prefix.length).split('/')[0].replace(/\.html$/, ''); if (!slug) return null;
-        return { id: slug, slug, owner: user.uid };
+        const rel = b.pathname.slice(prefix.length).split('/');
+        return { id: slug, slug, owner: user.uid, page: rel.length > 1 ? rel.slice(1).join('/') : 'index.html' };
       }).map(toSite);
       await Promise.all(sites.filter(s => !s.invalid).map(s => ownerOrAdopt(s.slug, user.uid).catch(() => null)));
       sites.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
