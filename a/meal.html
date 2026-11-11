@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#f5f7fb">
+<title>오늘의 급식표</title>
+<style>
+:root{--bg:#f4f6fb;--card:rgba(255,255,255,.82);--ink:#182033;--muted:#778198;--line:#e7eaf1;--blue:#5578f5;--blue2:#eaf0ff;--shadow:0 14px 40px rgba(34,48,85,.08)}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 10% 0%,#e8efff 0,transparent 32%),var(--bg);color:var(--ink);font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
+.wrap{max-width:1180px;margin:auto;padding:32px 22px 60px}.top{display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:28px}.brand{display:flex;align-items:center;gap:12px}.logo{width:46px;height:46px;border-radius:16px;background:linear-gradient(135deg,#6f91ff,#8eafff);display:grid;place-items:center;color:white;font-size:23px;box-shadow:0 8px 18px #7696f455}.brand h1{font-size:22px;margin:0}.brand p{margin:3px 0 0;color:var(--muted);font-size:13px}.pill{border:1px solid var(--line);background:#fff;border-radius:99px;padding:9px 14px;color:#64708a;font-size:12px}
+.hero{background:linear-gradient(120deg,#526ff0,#829bff);color:white;border-radius:28px;padding:26px 28px;box-shadow:0 16px 34px #617ee533;margin-bottom:22px}.hero small{opacity:.85}.hero h2{font-size:27px;margin:8px 0}.hero p{margin:0;opacity:.9;font-size:14px}
+.panel{background:var(--card);backdrop-filter:blur(18px);border:1px solid #ffffffc9;border-radius:24px;padding:20px;box-shadow:var(--shadow);margin-bottom:18px}
+.searchrow{display:grid;grid-template-columns:1fr auto;gap:10px}.searchrow input,.keyrow input{width:100%;min-width:0;border:1px solid var(--line);border-radius:14px;padding:13px 15px;font-size:14px;background:#fff;color:var(--ink);outline:none}.searchrow input:focus,.keyrow input:focus{border-color:#8aa1ff;box-shadow:0 0 0 3px #5578f51a}
+button{border:0;border-radius:14px;background:var(--blue);color:#fff;padding:12px 18px;font-weight:700;font-size:14px;cursor:pointer;transition:.18s}button:hover{filter:brightness(1.05);transform:translateY(-1px)}button:disabled{opacity:.5;cursor:wait;transform:none}.subbtn{background:var(--blue2);color:#4564d7}.keyrow{display:flex;gap:9px;margin-top:12px}.hint{font-size:12px;color:var(--muted);line-height:1.6;margin:10px 2px 0}.results{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.school{background:#f1f4ff;color:#405bc3;border:1px solid #e0e7ff;padding:9px 12px;border-radius:12px;text-align:left}.school span{display:block;font-size:11px;color:#7c88ac;font-weight:500;margin-top:3px}
+.toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.tabs{display:flex;gap:5px;background:#f0f2f8;padding:4px;border-radius:14px}.tabs button{background:transparent;color:#788198;padding:9px 15px}.tabs button.active{background:white;color:#3f5ed2;box-shadow:0 2px 8px #1c2b5010}.monthnav{display:flex;align-items:center;gap:12px}.monthnav strong{font-size:18px;min-width:126px;text-align:center}.arrow{background:#f0f3fa;color:#53617d;padding:9px 13px}.today{background:#edf1ff;color:#4c67d4;padding:9px 13px}
+.status{font-size:13px;color:var(--muted);margin:14px 2px 0}.calendar{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px;margin-top:18px}.weekday{text-align:center;color:#8992a7;font-size:12px;padding:6px}.day{min-height:142px;background:#fff;border:1px solid var(--line);border-radius:16px;padding:10px;cursor:pointer;transition:.15s;overflow:hidden}.day:hover{border-color:#9aafff;transform:translateY(-2px)}.day.muted{opacity:.42;background:#fafbfe}.day.today{border:2px solid #7390ff;background:#f8faff}.day.selected{box-shadow:inset 0 0 0 2px #5578f5}.num{font-size:13px;font-weight:750;color:#536078}.mealtext{font-size:11px;line-height:1.55;color:#46516a;margin-top:8px;display:-webkit-box;-webkit-line-clamp:5;-webkit-box-orient:vertical;overflow:hidden;white-space:pre-line}.nodata{font-size:11px;color:#b0b7c5;margin-top:10px}
+.weekgrid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-top:18px}.weekdaycard{background:#fff;border:1px solid var(--line);border-radius:18px;padding:15px;min-height:190px}.weekdaycard .date{font-size:12px;color:var(--muted)}.weekdaycard h3{font-size:17px;margin:5px 0 14px}.weekdaycard p{font-size:13px;line-height:1.8;margin:0;white-space:pre-line;color:#46516a}.weekdaycard.today{background:#f8faff;border:2px solid #7390ff}
+.detail{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:start}.detail h3{margin:0 0 5px;font-size:18px}.detail .date{font-size:12px;color:var(--muted)}.menu{white-space:pre-line;line-height:1.9;font-size:14px;color:#3d4962;margin-top:14px}.meta{font-size:12px;color:var(--muted);margin-top:12px}.empty{padding:36px 15px;text-align:center;color:var(--muted);background:#fff;border:1px dashed #dce1eb;border-radius:18px;margin-top:18px}
+footer{text-align:center;color:#9aa2b3;font-size:11px;margin-top:26px}
+@media(max-width:760px){.wrap{padding:20px 13px 40px}.hero{padding:22px;border-radius:22px}.hero h2{font-size:23px}.panel{padding:15px;border-radius:20px}.calendar{gap:4px}.day{min-height:105px;padding:6px;border-radius:11px}.mealtext{font-size:10px;-webkit-line-clamp:4}.weekday{font-size:11px}.weekgrid{grid-template-columns:1fr;gap:8px}.weekdaycard{min-height:auto}.top{align-items:flex-start}.pill{display:none}.searchrow{grid-template-columns:1fr}.searchrow button{width:100%}.keyrow{flex-direction:column}.monthnav{width:100%;justify-content:space-between}.toolbar{align-items:flex-start}.day .num{font-size:12px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand"><div class="logo">🍱</div><div><h1>오늘의 급식표</h1><p>우리 학교 월간 · 주간 식단</p></div></div>
+    <div class="pill">NEIS 학교급식 데이터 연동</div>
+  </header>
+  <section class="hero"><small id="todayLabel">오늘의 식단</small><h2 id="heroTitle">우리 학교 급식 한눈에 보기</h2><p>학교를 검색하고 월간 또는 주간 식단을 확인해 보세요.</p></section>
+
+  <section class="panel">
+    <div class="searchrow"><input id="schoolName" placeholder="학교 이름을 입력하세요 (예: 서울○○초등학교)" autocomplete="off"><button id="searchBtn">학교 검색</button></div>
+    <div id="schoolResults" class="results"></div>
+    <div id="schoolInfo" class="status">학교를 검색해 선택해 주세요.</div>
+  </section>
+
+  <section class="panel">
+    <div class="toolbar">
+      <div class="tabs"><button id="monthTab" class="active">월간 보기</button><button id="weekTab">주간 보기</button></div>
+      <div class="monthnav"><button class="arrow" id="prev">‹</button><strong id="periodTitle">2026년 11월</strong><button class="arrow" id="next">›</button><button class="today" id="goToday">오늘</button></div>
+    </div>
+    <div id="status" class="status">학교를 선택하면 급식표가 표시됩니다.</div>
+    <div id="calendar" class="calendar"></div>
+    <div id="week" class="weekgrid" style="display:none"></div>
+  </section>
+
+  <section class="panel" id="detailPanel">
+    <div class="detail"><div><h3 id="detailTitle">날짜를 선택해 주세요</h3><div class="date" id="detailDate">선택한 날짜의 급식 정보가 여기에 표시됩니다.</div></div><div class="pill">선택한 식단</div></div>
+    <div class="menu" id="detailMenu">월간 달력에서 날짜를 누르면 자세한 메뉴를 볼 수 있습니다.</div>
+    <div class="meta" id="detailMeta"></div>
+  </section>
+  <footer>급식 정보 출처: 교육부 나이스(NEIS) 교육정보 개방 포털 · 실제 식단은 학교 사정에 따라 변경될 수 있습니다.</footer>
+</div>
+<script>
+const $=id=>document.getElementById(id);
+const today=new Date(); let viewDate=new Date(today.getFullYear(),today.getMonth(),1), mode='month', selectedDate=fmt(today), school=null, meals={};
+const DEFAULT_KEY='710f4894c6bf4edda9c2409c0ffa415f';
+const savedSchool=localStorage.getItem('neis_meal_school');
+if(savedSchool){try{school=JSON.parse(savedSchool);}catch(e){}}
+if(!school){
+  school={name:'서울청량초등학교',region:'서울특별시교육청',edu:'B10',code:'7021116'};
+  localStorage.setItem('neis_meal_school',JSON.stringify(school));
+}
+$('schoolInfo').style.display='none';$('heroTitle').textContent=school.name+' 급식표';
+function fmt(d){return d.getFullYear()+String(d.getMonth()+1).padStart(2,'0')+String(d.getDate()).padStart(2,'0')}
+function dateFrom(s){return new Date(+s.slice(0,4),+s.slice(4,6)-1,+s.slice(6,8))}
+function dateLabel(d){return `${d.getFullYear()}년 ${d.getMonth()+1}월 ${d.getDate()}일`}
+function cleanMenu(s){return (s||'').replace(/<br\s*\/?>/gi,'\n').replace(/&nbsp;/g,' ').replace(/\([0-9.,\s]+\)/g,m=>m).replace(/^\s+|\s+$/g,'')}
+function setStatus(t){$('status').textContent=t}
+
+async function api(path,params){const key=DEFAULT_KEY;const u=new URL('https://open.neis.go.kr/hub/'+path);Object.entries({KEY:key,Type:'json',pIndex:1,pSize:1000,...params}).forEach(([k,v])=>u.searchParams.set(k,v));let r;try{r=await fetch(u)}catch(err){throw Error('NEIS에 연결하지 못했습니다(네트워크/보안 차단). 앱 미리보기가 아닌 Safari·Chrome 등 브라우저에서 파일을 열어 주세요. ['+err.message+']')}if(!r.ok)throw Error('NEIS 서버 응답 오류: '+r.status);const j=await r.json();if(j.RESULT&&j.RESULT.CODE&&j.RESULT.CODE!=='INFO-000')throw Error(j.RESULT.CODE+': '+j.RESULT.MESSAGE);return j}
+$('searchBtn').onclick=searchSchools;$('schoolName').addEventListener('keydown',e=>{if(e.key==='Enter')searchSchools()});
+async function searchSchools(){const name=$('schoolName').value.trim();if(!name){alert('학교 이름을 입력해 주세요.');return}const b=$('searchBtn');b.disabled=true;b.textContent='검색 중';$('schoolResults').innerHTML='';try{const j=await api('schoolInfo',{SCHUL_NM:name});const rows=j.schoolInfo?.[1]?.row||[];if(!rows.length)throw Error('검색 결과가 없습니다. 학교 이름을 확인해 주세요.');rows.slice(0,20).forEach(x=>{const btn=document.createElement('button');btn.className='school';btn.innerHTML=`${escapeHtml(x.SCHUL_NM)}<span>${escapeHtml(x.ORG_RDNMA||x.ORG_RDNDA||'')} · ${escapeHtml(x.ATPT_OFCDC_SC_NM||'')}</span>`;btn.onclick=()=>chooseSchool(x);$('schoolResults').appendChild(btn)});}catch(e){setStatus(e.message)}finally{b.disabled=false;b.textContent='학교 검색'}}
+function escapeHtml(s){return String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function chooseSchool(x){school={name:x.SCHUL_NM,region:x.ATPT_OFCDC_SC_NM,edu:x.ATPT_OFCDC_SC_CODE,code:x.SD_SCHUL_CODE};localStorage.setItem('neis_meal_school',JSON.stringify(school));$('schoolInfo').style.display='none'; $('schoolResults').innerHTML='';$('heroTitle').textContent=school.name+' 급식표';loadMeals()}
+async function loadMeals(){if(!school){setStatus('먼저 학교를 검색해 선택해 주세요.');render();return}
+if(!school.code){
+  try{
+    const sj=await api('schoolInfo',{SCHUL_NM:'청량초등학교',ATPT_OFCDC_SC_CODE:'B10'});
+    const list=sj.schoolInfo?.[1]?.row||[];const found=list.find(x=>x.SCHUL_NM==='서울청량초등학교')||list.find(x=>x.SCHUL_NM.includes('청량초등학교'));
+    if(!found) throw Error('서울 청량초등학교 정보를 찾지 못했습니다. 학교 검색에서 직접 선택해 주세요.');
+    school={name:found.SCHUL_NM,region:found.ATPT_OFCDC_SC_NM,edu:found.ATPT_OFCDC_SC_CODE,code:found.SD_SCHUL_CODE};
+    localStorage.setItem('neis_meal_school',JSON.stringify(school));
+    $('schoolInfo').style.display='none';
+  }catch(e){setStatus(e.message);render();return}
+}
+let from,to;if(mode==='month'){const f=new Date(viewDate.getFullYear(),viewDate.getMonth(),1);from=new Date(f);from.setDate(f.getDate()-f.getDay());to=new Date(from);to.setDate(from.getDate()+41)}else{from=monday(viewDate);to=new Date(from);to.setDate(from.getDate()+6)}const b=fmt(from),e=fmt(to);setStatus('급식 정보를 불러오는 중입니다…');try{const j=await api('mealServiceDietInfo',{ATPT_OFCDC_SC_CODE:school.edu,SD_SCHUL_CODE:school.code,MLSV_FROM_YMD:b,MLSV_TO_YMD:e});const rows=j.mealServiceDietInfo?.[1]?.row||[];meals={};rows.forEach(r=>{const k=r.MLSV_YMD;if(meals[k]&&r.MMEAL_SC_CODE!=='2')return;const menu=cleanMenu(r.DDISH_NM);meals[k]={menu,cal:r.CAL_INFO||'',ntr:r.NTR_INFO||'',origin:r.ORPLC_INFO||'',meal:r.MMEAL_SC_NM||'중식'} });setStatus(rows.length?`${school.name} · ${Object.keys(meals).length}일의 급식 정보`: '해당 기간에 등록된 급식 정보가 없습니다.');render()}catch(e){if(String(e.message).includes('INFO-200')){meals={};setStatus('해당 기간에 등록된 급식 정보가 없습니다.')}else setStatus(e.message);render()}}
+function render(){const y=viewDate.getFullYear(),m=viewDate.getMonth();$('periodTitle').textContent=mode==='month'?`${y}년 ${m+1}월`:weekRange();$('calendar').style.display=mode==='month'?'grid':'none';$('week').style.display=mode==='week'?'grid':'none';$('monthTab').classList.toggle('active',mode==='month');$('weekTab').classList.toggle('active',mode==='week');if(mode==='month')renderMonth();else renderWeek();showDetail(selectedDate)}
+function mealText(k){return meals[k]?.menu||''}
+function renderMonth(){const first=new Date(viewDate.getFullYear(),viewDate.getMonth(),1),start=new Date(first);start.setDate(first.getDate()-first.getDay());let out='';['일','월','화','수','목','금','토'].forEach(w=>out+=`<div class="weekday">${w}</div>`);for(let i=0;i<42;i++){const d=new Date(start);d.setDate(start.getDate()+i);const k=fmt(d),data=meals[k],muted=d.getMonth()!==viewDate.getMonth();out+=`<div class="day ${muted?'muted':''} ${k===fmt(today)?'today':''} ${k===selectedDate?'selected':''}" data-date="${k}"><div class="num">${d.getDate()}</div>${data?`<div class="mealtext">${escapeHtml(data.menu)}</div>`:'<div class="nodata">급식 정보 없음</div>'}</div>`}$('calendar').innerHTML=out;$('calendar').querySelectorAll('.day').forEach(el=>el.onclick=()=>{selectedDate=el.dataset.date;showDetail(selectedDate);renderMonth()})}
+function monday(d){const x=new Date(d);const n=(x.getDay()+6)%7;x.setDate(x.getDate()-n);return x}
+function weekRange(){const s=monday(viewDate),e=new Date(s);e.setDate(s.getDate()+4);return `${s.getMonth()+1}.${s.getDate()} – ${e.getMonth()+1}.${e.getDate()}`}
+function renderWeek(){const s=monday(viewDate);let out='';['월','화','수','목','금'].forEach((w,i)=>{const d=new Date(s);d.setDate(s.getDate()+i);const k=fmt(d),data=meals[k];out+=`<div class="weekdaycard ${k===fmt(today)?'today':''}" data-date="${k}"><div class="date">${d.getMonth()+1}월 ${d.getDate()}일</div><h3>${w}요일</h3><p>${data?escapeHtml(data.menu):'등록된 급식 정보가 없습니다.'}</p></div>`});$('week').innerHTML=out;$('week').querySelectorAll('.weekdaycard').forEach(el=>el.onclick=()=>{selectedDate=el.dataset.date;showDetail(selectedDate)})}
+function showDetail(k){const d=dateFrom(k),data=meals[k];$('detailTitle').textContent=data?`${data.meal} 식단`:'급식 정보 없음';$('detailDate').textContent=dateLabel(d);$('detailMenu').textContent=data?data.menu:'선택한 날짜에 등록된 급식 정보가 없습니다.';$('detailMeta').innerHTML=data?metaHtml(data):''}
+function metaHtml(data){const parts=[];if(data.cal)parts.push('열량: '+escapeHtml(data.cal));if(data.ntr){const items=data.ntr.split(/<br\s*\/?>/i).map(x=>x.trim()).filter(Boolean).map(x=>escapeHtml(x.replace(/\s*:\s*/,': ')));if(items.length)parts.push('<strong>영양정보</strong><br>'+items.join('<br>'))}return parts.join('<br><br>')}
+$('monthTab').onclick=()=>{if(mode==='month')return;mode='month';viewDate=new Date(viewDate.getFullYear(),viewDate.getMonth(),1);loadMeals()};$('weekTab').onclick=()=>{if(mode==='week')return;mode='week';const inMonth=today.getFullYear()===viewDate.getFullYear()&&today.getMonth()===viewDate.getMonth();viewDate=inMonth?new Date(today):new Date(viewDate.getFullYear(),viewDate.getMonth(),1);loadMeals()};$('prev').onclick=()=>{if(mode==='month')viewDate=new Date(viewDate.getFullYear(),viewDate.getMonth()-1,1);else viewDate.setDate(viewDate.getDate()-7);if(school)loadMeals();else render()};$('next').onclick=()=>{if(mode==='month')viewDate=new Date(viewDate.getFullYear(),viewDate.getMonth()+1,1);else viewDate.setDate(viewDate.getDate()+7);if(school)loadMeals();else render()};$('goToday').onclick=()=>{viewDate=mode==='month'?new Date(today.getFullYear(),today.getMonth(),1):new Date(today);selectedDate=fmt(today);if(school)loadMeals();else render()};
+$('todayLabel').textContent=`오늘은 ${dateLabel(today)}입니다`;if(school)loadMeals();else render();
+</script>
+</body>
+</html>
