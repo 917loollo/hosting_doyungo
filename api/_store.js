@@ -84,6 +84,6 @@ export async function ownerOrAdopt(slug, uid) {
   const o = await ownerOf(slug); if (o) return o;
   if (!uid || uid === 'admin') return null;
   const mine = await B.list({ prefix: projectPrefix(uid, slug), limit: 1, token: token() });
-  if (!mine.blobs.length) return null;
+  if (!mine.blobs.length && !(await readBlob(sitePath(uid, slug)))) return null;
   return (await claimSlug(slug, uid)) ? uid : null;
 }
