@@ -38,7 +38,7 @@ async function siteHandler(req, res, user, slug) {
     return res.status(200).json({ path: fp, content: file.buf.toString('base64'), contentType: file.contentType || contentTypeFor(fp) });
   }
   if (isLegacy) {
-    const r = await readBlob(owner ? sitePath(owner, slug) : legacyPath(slug));
+    const r = (owner && await readBlob(sitePath(owner, slug))) || await readBlob(legacyPath(slug));
     if (!r) return res.status(404).json({ error: '사이트를 찾을 수 없습니다.' });
     const html = r.buf.toString('utf8');
     return res.status(200).json({ slug, html, title: titleFromHtml(html), files: [{ path: 'index.html', size: r.buf.length }], legacy: true });
@@ -84,9 +84,22 @@ export default async function handler(req, res) {
         const rel = b.pathname.slice(prefix.length).split('/');
         return { id: slug, slug, owner: user.uid, page: rel.length > 1 ? rel.slice(1).join('/') : 'index.html' };
       }).map(toSite);
-      await Promise.all(sites.filter(s => !s.invalid).map(s => ownerOrAdopt(s.slug, user.uid).catch(() => null)));
+      const t0 = Date.now(), sleep = ms => new Promise(r => setTimeout(r, ms));
+      // 주소 기록은 있는데 위 폴더에 파일이 없는 사이트(예전 방식)도 목록에 포함
+      try {
+        const have = new Set(sites.map(s => s.slug));
+        const recs = (await listAll('slugs/')).filter(b => b.pathname.endsWith('.json') && !have.has(b.pathname.slice(6, -5))).slice(0, 400);
+        for (let i = 0; i < recs.length && Date.now() - t0 < 5000; i += 25) {
+          await Promise.all(recs.slice(i, i + 25).map(async b => {
+            const slug = b.pathname.slice(6, -5);
+            if ((await ownerOf(slug).catch(() => null)) === user.uid) sites.push({ slug, owner: user.uid, mine: true, files: 0, pages: [], invalid: !valid(slug), url: `${baseUrl(req)}/${slug}`, updatedAt: b.uploadedAt });
+          }));
+        }
+      } catch {}
+      // 주소 등록이 안 된 사이트 자동 등록 (오래 걸리면 기다리지 않음)
+      await Promise.race([Promise.all(sites.filter(s => !s.invalid && s.files).map(s => ownerOrAdopt(s.slug, user.uid).catch(() => null))), sleep(3000)]);
       sites.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
-      return res.status(200).json({ sites, admin: false });
+      return res.status(200).json({ sites, admin: false, uid: user.uid.slice(0, 6), scanned: blobs.length });
     }
     if (req.method === 'POST') {
       let b = req.body; if (typeof b === 'string') b = JSON.parse(b || '{}'); b = b || {};
