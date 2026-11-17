@@ -376,24 +376,45 @@ $('#saveBtn').onclick = async () => {
 };
 
 // ---------- 내 사이트 목록 / 편집 / 삭제 ----------
+let allSites = [], openSlug = '', scanInfo = null;
+function renderSites() {
+  const box = $('#sitesList'), q = $('#siteSearch').value.trim().toLowerCase();
+  $('#siteCount').textContent = allSites.length;
+  box.innerHTML = '';
+  const note = scanInfo ? `<div class="scan">로그인 계정 ID ${esc(scanInfo.uid)}… · 파일 ${scanInfo.scanned}개 확인</div>` : '';
+  if (!allSites.length) { box.innerHTML = '<div class="empty">이 계정에는 사이트가 없어요.<br>예전에 이메일·전화·Google 중 다른 방법으로 올렸다면, 그 방법으로 다시 로그인해 보세요.</div>' + note; return; }
+  const list = allSites.filter(s => !q || s.slug.toLowerCase().includes(q));
+  if (!list.length) { box.innerHTML = '<div class="empty">검색 결과가 없어요.</div>'; return; }
+  list.forEach(s => {
+    const open = openSlug === s.slug, isEdit = editing?.slug === s.slug;
+    const el = document.createElement('div');
+    el.className = 'site' + (open ? ' open' : '') + (isEdit ? ' editing' : '') + (s.invalid ? ' bad' : '');
+    const pages = (s.pages || []).length > 1 ? `<div class="pages">${s.pages.map(p => `<a href="${esc(s.url + (p === 'index.html' ? '' : '/' + p.replace(/\.html?$/i, '')))}" target="_blank" rel="noopener">${esc(p.replace(/\.html?$/i, ''))}</a>`).join('')}</div>` : '';
+    const tag = (s.owner && !s.mine) ? `<span class="tag">${s.owner === 'legacy' ? '구버전' : '다른 사용자'}</span>` : s.invalid ? '<span class="tag warn">이름 확인</span>' : '';
+    el.innerHTML = `<button type="button" class="site-row" aria-expanded="${open}"><span class="dot"></span><span class="site-name">${esc(s.slug)}</span>${tag}<span class="chev">›</span></button>
+      <div class="site-detail"><a class="site-url" href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.url)}</a>${pages}
+      <div class="site-meta">${s.files ? s.files + '개 파일 · ' : ''}${s.updatedAt ? new Date(s.updatedAt).toLocaleString('ko-KR') : ''}</div>
+      <div class="site-actions"><button type="button" class="primary" data-a="edit"${s.invalid ? ' disabled title="영문 소문자·숫자·하이픈 이름만 편집할 수 있어요"' : ''}>편집</button><a class="secondary" href="${esc(s.url)}" target="_blank" rel="noopener">열기</a><button type="button" class="secondary" data-a="copy">URL 복사</button><button type="button" class="secondary danger" data-a="del">삭제</button></div></div>`;
+    el.querySelector('.site-row').onclick = () => { openSlug = open ? '' : s.slug; renderSites(); };
+    el.querySelector('[data-a=edit]').onclick = e => loadSite(s.slug, e.currentTarget);
+    el.querySelector('[data-a=copy]').onclick = async e => { const b = e.currentTarget; try { await navigator.clipboard.writeText(s.url); b.textContent = '복사됨 ✓'; setTimeout(() => b.textContent = 'URL 복사', 1200); } catch { prompt('URL을 복사하세요', s.url); } };
+    el.querySelector('[data-a=del]').onclick = () => deleteSite(s.slug, window.__admin ? s.owner : '');
+    box.appendChild(el);
+  });
+  box.insertAdjacentHTML('beforeend', note);
+}
 async function loadSites() {
-  const box = $('#sitesList');
   try {
     const d = await api('/api/sites');
-    box.innerHTML = '';
+    window.__admin = !!d.admin;
     if (d.admin) statusEl.textContent = '● 관리자' + (auth.currentUser?.email ? ' · ' + auth.currentUser.email : '');
-    $('#siteCount').textContent = d.sites.length ? d.sites.length + '개' : '';
-    if (!d.sites.length) { box.innerHTML = '<div class="empty">아직 공개한 사이트가 없어요.<br>‘＋ 새 사이트’로 첫 사이트를 만들어 보세요.</div>'; return; }
-    d.sites.forEach(s => {
-      const el = document.createElement('div'); el.className = 'site' + (editing?.slug === s.slug ? ' editing' : '') + (s.invalid ? ' bad' : ''); el.dataset.slug = s.slug;
-      el.innerHTML = `<div><div class="site-name">${esc(s.slug)}${s.invalid ? ' <span class="tag warn">이름 확인 필요</span>' : ''}${editing?.slug === s.slug ? ' <span class="tag live">편집 중</span>' : ''}${s.owner && !s.mine ? ` <span class="tag">${s.owner === 'legacy' ? '구버전' : '다른 사용자 ' + esc(s.owner.slice(0, 6))}</span>` : ''}</div><a class="site-url" href="${esc(s.url)}" target="_blank" rel="noopener">${esc(s.url)}</a><div class="pages">${(s.pages || []).length > 1 ? s.pages.map(p => `<a href="${esc(s.url + (p === 'index.html' ? '' : '/' + p.replace(/\.html?$/i, '')))}" target="_blank" rel="noopener">${esc(p.replace(/\.html?$/i, ''))}</a>`).join('') : ''}</div><div class="site-meta">${s.files ? s.files + '개 파일 · ' : ''}${s.updatedAt ? new Date(s.updatedAt).toLocaleString('ko-KR') : ''}</div></div><div class="site-actions"><button class="primary" data-edit="${esc(s.slug)}"${s.invalid ? ' disabled title="영문 소문자·숫자·하이픈 이름만 편집할 수 있어요"' : ''}>편집</button><button class="secondary" data-copy="${esc(s.url)}">URL 복사</button><button class="secondary" data-del="${esc(s.slug)}" data-owner="${d.admin ? esc(s.owner || '') : ''}">삭제</button></div>`;
-      box.appendChild(el);
-    });
-    box.querySelectorAll('[data-edit]').forEach(b => b.onclick = () => loadSite(b.dataset.edit, b));
-    box.querySelectorAll('[data-copy]').forEach(b => b.onclick = async () => { try { await navigator.clipboard.writeText(b.dataset.copy); b.textContent = '복사됨 ✓'; setTimeout(() => b.textContent = 'URL 복사', 1200); } catch { prompt('URL을 복사하세요', b.dataset.copy); } });
-    box.querySelectorAll('[data-del]').forEach(b => b.onclick = () => deleteSite(b.dataset.del, b.dataset.owner));
-  } catch (e) { box.innerHTML = '<div class="empty">사이트 목록을 불러오지 못했습니다: ' + esc(e.message) + '</div>'; }
+    allSites = d.sites || [];
+    scanInfo = d.uid ? { uid: d.uid, scanned: d.scanned } : null;
+    if (editing && !openSlug) openSlug = editing.slug;
+    renderSites();
+  } catch (e) { $('#sitesList').innerHTML = '<div class="empty">사이트 목록을 불러오지 못했습니다: ' + esc(e.message) + '</div>'; }
 }
+$('#siteSearch').addEventListener('input', renderSites);
 async function loadSite(slug, btn) {
   if (editing?.slug !== slug && !confirmDiscard()) return;
   const run = async () => {
